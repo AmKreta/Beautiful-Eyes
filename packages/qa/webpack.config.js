@@ -37,14 +37,12 @@ module.exports = {
     module: {
         rules: [
             {
+                test:/\.template.html/,
+                use : ['babel-loader']
+            },
+            {
                 test:/\.(ts|tsx)$/,
                 use: [
-                    {
-                      loader: 'babel-loader',
-                      options: {
-                        // Babel config is handled via `.babelrc` or `babel.config.json`
-                      }
-                    },
                     {
                         loader:'ts-loader'
                     }
