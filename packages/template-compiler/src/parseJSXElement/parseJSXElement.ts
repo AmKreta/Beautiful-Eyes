@@ -11,12 +11,19 @@ export default function parseJSXElement(path: NodePath<t.JSXElement>){
     const props: t.ObjectProperty[] = parseAttributes(attributes);
     const children:any[] = parseChildren(path);
 
-    path.replaceWith(
-        t.objectExpression([
-          t.objectProperty(t.identifier('type'), t.stringLiteral('element')),
-          t.objectProperty(t.identifier('kind'), t.stringLiteral(elementName)),
-          t.objectProperty(t.identifier('props'), t.objectExpression(props)),
-          t.objectProperty(t.identifier('children'), t.arrayExpression(children))
-        ])
-      );
+    // properties of a transpiled node
+    const nodeProperties = [
+      t.objectProperty(t.identifier('type'), t.stringLiteral('element')),
+      t.objectProperty(t.identifier('kind'), t.stringLiteral(elementName)),
+    ];
+
+    if(props.length){
+      nodeProperties.push( t.objectProperty(t.identifier('props'), t.objectExpression(props)));
+    }
+
+    if(children.length){
+      nodeProperties.push(  t.objectProperty(t.identifier('children'), t.arrayExpression(children)));
+    }
+
+    path.replaceWith(t.objectExpression(nodeProperties));
 }
