@@ -1,0 +1,9 @@
+{
+    "presets": [
+      "@babel/preset-env",
+      "@babel/preset-typescript"
+    ],
+    "plugins": [
+      "@beautiful-eyes/template-compiler/dist/index.js"
+    ]
+  }
