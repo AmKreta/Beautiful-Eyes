@@ -1,4 +1,5 @@
 import * as t from '@babel/types';
+import parseJSXExpression from '../parseJSXExpression/parseJSXExpression';
 
 function parseAttributeValue(val:t.JSXElement | t.JSXFragment | t.StringLiteral | t.JSXExpressionContainer | null | undefined){
     if(!val){
@@ -7,7 +8,7 @@ function parseAttributeValue(val:t.JSXElement | t.JSXFragment | t.StringLiteral 
 
     if(t.isJSXExpressionContainer(val)){
       // do nothing
-      return val.expression;
+      return parseJSXExpression(val.expression)
     }
 
     if(t.isJSXElement(val)){
@@ -19,7 +20,7 @@ function parseAttributeValue(val:t.JSXElement | t.JSXFragment | t.StringLiteral 
     }
 
     if(t.isStringLiteral(val)){
-        return val.value;
+        return t.stringLiteral(val.value);
     }
 
     throw new Error("while parsing attribute value, expected | t.StringLiteral | t.JSXExpressionContainer | null | undefined got "+ (val as any).type);
@@ -36,14 +37,26 @@ export default function parseAttributes(attributes:(t.JSXAttribute | t.JSXSpread
             throw new Error("expected string as attribute name got "+attrName.type);
           }
 
-          const attrValue = attr.value as any as t.StringLiteral;
+          const attrValue = attr.value;
+          if(t.isStringLiteral(attrValue)){
+            props.push(
+              t.objectProperty(
+                t.identifier(attrName),
+                t.stringLiteral(attrValue.value)
+              )
+            );
+          }
+          else if(t.isJSXExpressionContainer(attrValue)){
+            props.push(
+              t.objectProperty(
+                t.identifier(attrName),
+                parseJSXExpression(attrValue.expression)
+              )
+            );
+          }
 
-          props.push(
-            t.objectProperty(
-              t.identifier(attrName),
-              t.stringLiteral(attrValue.value)
-            )
-          );
+
+
 
       //   if (t.isJSXExpressionContainer(attrValue)) {
       //     props.push(

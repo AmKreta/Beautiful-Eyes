@@ -1,6 +1,6 @@
 import { NodePath } from "@babel/core";
 import * as t from '@babel/types';
-import parseAttributes from "../parseAttributes/parseParams.component";
+import parseAttributes from "../parseAttributes/parseAttributes";
 import parseChildren from "../parseChildren/parseChildren";
 
 export default function parseJSXElement(path: NodePath<t.JSXElement>){
