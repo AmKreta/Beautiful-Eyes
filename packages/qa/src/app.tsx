@@ -1,7 +1,0 @@
-import {bootstrap} from '@beautiful-eyes/core';
-
-console.log(bootstrap)
-
-import('./app.template.html').then(res=>{
-    console.log(res.default)
-});

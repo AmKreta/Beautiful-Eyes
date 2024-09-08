@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:qa": "npm run start:dev -w @beautiful-eyes/qa"
   },
   "keywords": [],
   "author": "",
@@ -39,6 +40,7 @@
     "packages/template-compiler",
     "packages/core",
     "packages/qa",
-    "packages/lib"
+    "packages/lib",
+    "packages/dynamic-import"
   ]
 }

@@ -1,0 +1,9 @@
+{
+    "extends":"../../tsconfig.json",
+    "compileOnSave": true,
+    "compilerOptions": {
+      "outDir": "dist",
+      "module": "CommonJS",
+      "target": "ES6"
+    }
+  }

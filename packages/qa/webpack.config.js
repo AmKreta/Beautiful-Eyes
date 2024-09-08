@@ -3,9 +3,10 @@ const path = require("path");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require("copy-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const {dynamicImport} = require('@beautiful-eyes/dynamic-import/dist/index');
 
 module.exports = {
-    entry: path.resolve(__dirname, "src", "app.tsx"),
+    entry: path.resolve(__dirname, "src", "app.ts"),
     output: {
         filename: '[name].bundle.js',
         path: path.resolve(__dirname, `dist`),
@@ -44,7 +45,12 @@ module.exports = {
                 test:/\.(ts|tsx)$/,
                 use: [
                     {
-                        loader:'ts-loader'
+                        loader:'ts-loader',
+                        options: {
+                            getCustomTransformers: (program) => ({
+                                before: [dynamicImport(program)],
+                            }),
+                        },
                     }
                   ],
             },

@@ -4,8 +4,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start:dev": "npm run build -w @beautiful-eyes/template-compiler && webpack serve",
-    "build:dev": "npm run build -w @beautiful-eyes/template-compiler && webpack build"
+    "build:template-compiler":"npm run build -w @beautiful-eyes/template-compiler",
+    "build:dynamic-import":"npm run build -w @beautiful-eyes/dynamic-import",
+    "build:plugins":"npm run build:template-compiler && npm run build:dynamic-import",
+    "start:dev": "npm run build:plugins && webpack serve",
+    "build:dev": "npm run build:plugins && webpack build"
   },
   "keywords": [],
   "author": "",
@@ -13,6 +16,10 @@
   "description": "",
   "dependencies": {
     "@beautiful-eyes/template-compiler":"*",
+    "@beautiful-eyes/dynamic-import":"*",
     "@beautiful-eyes/core":"*"
+  },
+  "resolutions": {
+    "acorn": "^8.5.0"
   }
 }
