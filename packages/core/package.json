@@ -13,5 +13,8 @@
   "entry":"index.ts",
   "exports": {
     ".": "./index.ts"
+  },
+  "dependencies": {
+    "@beautiful-eyes/lib":"*"
   }
 }
