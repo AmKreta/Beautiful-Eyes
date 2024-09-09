@@ -2,7 +2,6 @@ import { IHtmlObj } from "@beautiful-eyes/lib";
 import buildNodeTree from "../buildNodeTree";
 
 export default function buildElement(htmlObj:IHtmlObj){
-    console.log(htmlObj)
     const element = document.createElement(htmlObj.kind as string);
     if(htmlObj.props){
         for(let propName in htmlObj.props){
