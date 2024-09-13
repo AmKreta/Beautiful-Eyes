@@ -21,7 +21,7 @@ class Button extends ReactiveClass{
     @State() b = 5;
 
     @Effect(['a.name']) amk(){
-        console.log('amk ran')
+        console.log('amk.name changed')
     } 
 
     constructor(){
@@ -40,7 +40,7 @@ const root = document.getElementById('root')!;
 const btn = new Button();
 bootstrap(root, btn);
 
-btn.a.value[2].val = "neha singh" as any
+btn.a.name = "neha singh";
 
 
 

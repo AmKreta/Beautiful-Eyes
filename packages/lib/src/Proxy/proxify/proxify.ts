@@ -3,15 +3,14 @@ import {updateParent} from "../updateParent/updateParent";
 import { addPath } from "../addPath/addPath";
 import { PROXY_OBJECT_KEYS } from "../proxyObjectKeys/proxyObjectKeys";
 import { Types } from "../../types/types";
-
-type MutationCallback = (path:string)=>void
+import {TaskQueue, MutationCallback} from "../taskQueue/taskQueue";
 
 export class Proxify{
-    private static readonly taskQueue:any[] = [];
+    private static readonly taskQueue = new TaskQueue();
     
     private static proxyHandler:ProxyHandler<any> | null = null;
 
-    private static getProxyHandler(cb?:Function):ProxyHandler<any>{
+    private static getProxyHandler(cb?:MutationCallback):ProxyHandler<any>{
         return  {
             get(target, prop, receiver){
                 const res = Reflect.get(target, prop, receiver);
@@ -21,13 +20,12 @@ export class Proxify{
             set(target, prop, value, receiver){ 
                 const res = Reflect.set(target, prop, value, receiver);
                 Proxify.updatePathKeys(res, target, prop);
-                if(prop !== PROXY_OBJECT_KEYS.path && cb){
-                    // Proxify.taskQueue.push({
-                    //     cb,
-                    //     context: target,
-                    //     args:{path: target[PROXY_OBJECT_KEYS.path]}
-                    // });
-                    cb(target[PROXY_OBJECT_KEYS.path]);   
+                if(prop !== PROXY_OBJECT_KEYS.path && prop!==PROXY_OBJECT_KEYS.parent && cb){
+                    Proxify.taskQueue.push({
+                        cb,
+                        context: target,
+                        args:{path: target[PROXY_OBJECT_KEYS.path]+`.${String(prop)}`}
+                    });
                 }
                 return res;
             }
