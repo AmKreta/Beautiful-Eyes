@@ -17,9 +17,7 @@
   "dependencies": {
     "@beautiful-eyes/template-compiler":"*",
     "@beautiful-eyes/dynamic-import":"*",
-    "@beautiful-eyes/core":"*"
-  },
-  "resolutions": {
-    "acorn": "^8.5.0"
+    "@beautiful-eyes/core":"*",
+    "@beautiful-eyes/lib":"*"
   }
 }

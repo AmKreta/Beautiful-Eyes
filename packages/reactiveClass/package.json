@@ -1,5 +1,5 @@
 {
-  "name": "@beautiful-eyes/core",
+  "name": "@beautiful-eyes/reactiveclass",
   "version": "1.0.0",
   "main": "index.js",
   "devDependencies": {},
@@ -10,12 +10,7 @@
   "author": "",
   "license": "ISC",
   "description": "",
-  "entry":"index.ts",
-  "exports": {
-    ".": "./index.ts"
-  },
   "dependencies": {
-    "@beautiful-eyes/lib":"*",
-    "@beautiful-eyes/reactiveclass":"*"
+    "@beautiful-eyes/lib":"*"
   }
 }

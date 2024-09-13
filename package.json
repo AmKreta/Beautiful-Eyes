@@ -41,6 +41,7 @@
     "packages/core",
     "packages/qa",
     "packages/lib",
-    "packages/dynamic-import"
+    "packages/dynamic-import",
+    "packages/reactiveClass"
   ]
 }

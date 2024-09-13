@@ -1,19 +1,46 @@
-import {bootstrap} from '@beautiful-eyes/core';
-import {Component} from '@beautiful-eyes/core';
+import {bootstrap, ReactiveClass, Component, Effect, State, } from '@beautiful-eyes/core';
+import { Proxify } from '@beautiful-eyes/lib';
 
 @Component({
     useTemplate:'./app.template.html',
     useStyleSheets:[]
 })
-class Button{
+class Button extends ReactiveClass{
 
+    @State() a = {
+        name:'amresh',
+        value:[
+            {val:1},
+            {val:2},
+            {val:3},
+            {val:4},
+            {val:5, detail:[1,2,3,4,5]}
+        ]
+    };
+    
+    @State() b = 5;
+
+    @Effect(['a.name']) amk(){
+        console.log('amk ran')
+    } 
+
+    constructor(){
+        super();
+    }
+    
     mounted(){
         console.log('button mounted');
     }
 
+   
+
 }
 
 const root = document.getElementById('root')!;
-bootstrap(root, new Button());
+const btn = new Button();
+bootstrap(root, btn);
+
+btn.a.value[2].val = "neha singh" as any
+
 
 
