@@ -1,5 +1,4 @@
 import {bootstrap, ReactiveClass, Component, Effect, State, } from '@beautiful-eyes/core';
-import { Proxify } from '@beautiful-eyes/lib';
 
 @Component({
     useTemplate:'./app.template.html',
