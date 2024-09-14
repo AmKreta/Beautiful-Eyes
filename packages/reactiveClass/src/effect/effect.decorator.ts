@@ -1,27 +1,12 @@
-function addStateChangeSubscriberToPrototype(this:any){
-    if(this.constructor.prototype.stateChageEffectSubscribers){
-        return;
-    }
-    Object.defineProperty(this.constructor.prototype,'stateChageEffectSubscribers',{
-        enumerable:false,
-        value:new Map() // {stateName => [effectNames]}
-    });
-}
+import { ReactiveClass } from "../reactiveClass/reactiveClass";
+import { getClassFromPrototypeChain } from "@beautiful-eyes/lib";
 
 export function Effect(dependencies:string[]){
     return function<T,V extends Array<any>,R>(target:(this:T, ...args:any[])=>R, context:ClassMethodDecoratorContext){
         context.addInitializer(function(this:any){
-            addStateChangeSubscriberToPrototype.call(this);
-            dependencies.forEach(dependency=>{
-                let subscriber = this.stateChageEffectSubscribers.get(dependency);
-                if(!subscriber){
-                    subscriber = new Set();
-                    this.stateChageEffectSubscribers.set(dependency, subscriber);
-                }
-                subscriber.add(context.name);
-            });
+            const rc:ReactiveClass = getClassFromPrototypeChain(this, ReactiveClass);
+            (rc.constructor as any).addStateChangeEffectSubscribers(dependencies, context);
         });
-
         return function(this:T,...args:V):R{
             return target.call(this, ...args);
         }

@@ -1,10 +1,9 @@
-import { Proxify } from "@beautiful-eyes/lib";
+import { getClassFromPrototypeChain, Proxify } from "@beautiful-eyes/lib";
+import { ReactiveClass } from "../reactiveClass/reactiveClass";
 
 function runStateChangeEffectSubscribers(self:any, path:string){
-    const effectsubscribers = self.__proto__.stateChageEffectSubscribers.get(path);
-    effectsubscribers?.forEach((effectFnName:string)=>{
-        self[effectFnName].call(self);
-    });
+    const rc:ReactiveClass = getClassFromPrototypeChain(self, ReactiveClass);
+    (rc.constructor as any).runStateChangeEffectSubscribers(self, path);
 }
 
 export function State(){
