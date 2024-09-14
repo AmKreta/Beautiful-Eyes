@@ -45,7 +45,8 @@ export class ReactiveClass{
     }
 
 
-    static runEffectSubscribers(context:any, paths:string[], batchedEffects:Set<string>){
+    static batchEffectSubscribers(context:any, paths:string[]){
+        const batchedEffects = new Set<string>();
         // runs effects when state changes
         for(let path of paths){
             const subscribers = ReactiveClass.effectSubscribers.get(path);
@@ -53,6 +54,7 @@ export class ReactiveClass{
                 batchedEffects.add(effectFnName);
             });
         }
+        return batchedEffects;
     }
 
     static runComputedSubscribers(path:string){
@@ -64,11 +66,10 @@ export class ReactiveClass{
     }
 
     static runSubscribers(context:any, path:string){
-        const batchedEffects = new Set<string>();
         // determine which computed were affected and which effects were dependent on them
         const paths = ReactiveClass.runComputedSubscribers(path);
         // batching effects based on determined path
-        ReactiveClass.runEffectSubscribers(context, paths, batchedEffects);
+        const batchedEffects = ReactiveClass.batchEffectSubscribers(context, paths);
         // running subscribers
         batchedEffects.forEach(effectFnName=>{
             context[effectFnName].call(context);
