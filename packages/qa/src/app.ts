@@ -25,6 +25,10 @@ class Button extends ReactiveClass{
         console.log('amk.name changed to ', this.a.name)
     } 
 
+    @Effect(['b']) onBChange(){
+        console.log('b changed, new val ', this.b);
+    }
+
     constructor(){
         super();
     }

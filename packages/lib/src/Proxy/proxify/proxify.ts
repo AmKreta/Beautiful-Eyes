@@ -6,7 +6,7 @@ import { Types } from "../../types/types";
 import {TaskQueue, MutationCallback} from "../taskQueue/taskQueue";
 
 export class Proxify{
-    private static readonly taskQueue = new TaskQueue();
+    public static readonly taskQueue = new TaskQueue();
     
     private static proxyHandler:ProxyHandler<any> | null = null;
 

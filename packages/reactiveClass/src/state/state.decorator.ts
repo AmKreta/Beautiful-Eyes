@@ -20,7 +20,11 @@ export function State(){
                 },
                 set(val:any){
                     value = val;
-                    runStateChangeEffectSubscribers(this, ctx.name as string);
+                    Proxify.taskQueue.push({
+                        context: this, 
+                        cb:()=>runStateChangeEffectSubscribers(this, ctx.name as string),
+                        args:{path:ctx.name as string}
+                    })
                     return true;
                 }
             });
@@ -28,6 +32,7 @@ export function State(){
 
         return function (val: V) :V{
             return Proxify.get(val, ctx.name as string, null, (path:string)=>{
+                // this function will be executed on idle callback from task queue
                 runStateChangeEffectSubscribers(self, path);
             }) as any;
         };
