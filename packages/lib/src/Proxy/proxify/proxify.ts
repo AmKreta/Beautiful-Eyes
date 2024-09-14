@@ -10,7 +10,7 @@ export class Proxify{
     
     private static proxyHandler:ProxyHandler<any> | null = null;
 
-    private static getProxyHandler(cb?:MutationCallback):ProxyHandler<any>{
+    private static getProxyHandler(contextObj:any, cb?:MutationCallback):ProxyHandler<any>{
         return  {
             get(target, prop, receiver){
                 const res = Reflect.get(target, prop, receiver);
@@ -23,7 +23,7 @@ export class Proxify{
                 if(prop !== PROXY_OBJECT_KEYS.path && prop!==PROXY_OBJECT_KEYS.parent && cb){
                     Proxify.taskQueue.push({
                         cb,
-                        context: target,
+                        context: contextObj,
                         args:{path: target[PROXY_OBJECT_KEYS.path]+`.${String(prop)}`}
                     });
                 }
@@ -104,7 +104,7 @@ export class Proxify{
         return  Proxify.makeProxy(set);
     }
     
-    static get(obj:any, stateName:string, parent:object|null = null, cb?:MutationCallback) : typeof obj{
+    static get(obj:any, stateName:string, contextObj: any, parent:object|null = null, cb?:MutationCallback) : typeof obj{
         if(!obj) return obj; // empty string, 0, null undefined etc;
         if(Types.isNumber(obj) || Types.isString(obj)) return obj;
 
@@ -116,7 +116,7 @@ export class Proxify{
         !parent && addPath(obj, stateName);
 
         // setting proxy handler before proxifying
-        Proxify.proxyHandler = Proxify.getProxyHandler(cb);
+        Proxify.proxyHandler = Proxify.getProxyHandler(contextObj, cb);
         if(Types.isArray(obj)) return  Proxify.proxifyArray(obj);
         if(Types.isObject(obj)) return  Proxify.proxifyObject(obj);
         if(Types.isMap(obj)) return  Proxify.proxifyMap(obj);
