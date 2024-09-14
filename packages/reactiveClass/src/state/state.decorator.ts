@@ -1,9 +1,9 @@
 import { getClassFromPrototypeChain, Proxify } from "@beautiful-eyes/lib";
 import { ReactiveClass } from "../reactiveClass/reactiveClass";
 
-function runStateChangeEffectSubscribers(self:any, path:string){
+function runStateChangeSubscribers(self:any, path:string){
     const rc:ReactiveClass = getClassFromPrototypeChain(self, ReactiveClass);
-    (rc.constructor as any).runStateChangeEffectSubscribers(self, path);
+    (rc.constructor as any).runSubscribers(self, path);
 }
 
 export function State(){
@@ -22,7 +22,7 @@ export function State(){
                     value = val;
                     Proxify.taskQueue.push({
                         context: this, 
-                        cb:()=>runStateChangeEffectSubscribers(this, ctx.name as string),
+                        cb:()=>runStateChangeSubscribers(this, ctx.name as string),
                         args:{path:ctx.name as string}
                     })
                     return true;
@@ -33,7 +33,7 @@ export function State(){
         return function (val: V) :V{
             return Proxify.get(val, ctx.name as string, null, (path:string)=>{
                 // this function will be executed on idle callback from task queue
-                runStateChangeEffectSubscribers(self, path);
+                runStateChangeSubscribers(self, path);
             }) as any;
         };
     };

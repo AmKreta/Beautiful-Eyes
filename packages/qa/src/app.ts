@@ -1,4 +1,4 @@
-import {bootstrap, ReactiveClass, Component, Effect, State, } from '@beautiful-eyes/core';
+import {bootstrap, ReactiveClass, Component, Effect, State, Computed} from '@beautiful-eyes/core';
 
 @Component({
     useTemplate:'./app.template.html',
@@ -21,11 +21,17 @@ class Button extends ReactiveClass{
 
     c = [1,2,3,4,5];
 
-    @Effect(['a.name']) amk(){
+    @Effect(['a.name']) 
+    amk(){
         console.log('amk.name changed to ', this.a.name)
     } 
 
-    @Effect(['b']) onBChange(){
+    @Computed(['a.name']) get name(){
+        return 'amk';
+    }
+
+    @Effect(['name']) 
+    onBChange(){
         console.log('b changed, new val ', this.b);
     }
 
@@ -44,6 +50,8 @@ class Button extends ReactiveClass{
 const root = document.getElementById('root')!;
 const btn = new Button();
 bootstrap(root, btn);
+
+let x = new Button();
 
 // should trigger effect
 btn.a.name = "I love neha singh";
