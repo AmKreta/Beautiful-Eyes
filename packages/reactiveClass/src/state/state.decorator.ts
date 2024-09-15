@@ -1,16 +1,13 @@
-import { getClassFromPrototypeChain, Proxify } from "@beautiful-eyes/lib";
+import { Proxify } from "@beautiful-eyes/lib";
 import { ReactiveClass } from "../reactiveClass/reactiveClass";
 
-function runStateChangeSubscribers(this:any, path:string){
-    const rc:ReactiveClass = getClassFromPrototypeChain(this, ReactiveClass);
-    (rc.constructor as any).runSubscribers(this, path);
+function runStateChangeSubscribers<This extends ReactiveClass>(this:This, path:string){
+    this.runSubscribers(path);
 }
 
 export function State(){
-    return function State<This, V>(target: undefined, ctx: ClassFieldDecoratorContext<This, V>) {
-        let self:This | null = null;
+    return function State<This extends ReactiveClass, V>(target: undefined, ctx: ClassFieldDecoratorContext<This, V>) {
         ctx.addInitializer(function(this:This){
-            self = this;
             let value = (this as any)[ctx.name];
 
             // defining accessors

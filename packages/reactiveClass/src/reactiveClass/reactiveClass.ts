@@ -19,7 +19,7 @@ export class ReactiveClass{
     }
 
     // dependency: state | computed -> [effectNames]
-    static addEffectSubscribers(dependencies:string[], context:ClassMethodDecoratorContext){
+    addEffectSubscribers(dependencies:string[], context:ClassMethodDecoratorContext){
         if(ReactiveClass.instances>1) return;
         dependencies.forEach(dependency=>{
             let subscriber = ReactiveClass.effectSubscribers.get(dependency);
@@ -32,7 +32,8 @@ export class ReactiveClass{
     }
 
     // dependency state | computed -> [effectNames]
-    static addComputedSubscribers(dependencies:string[], context:ClassMethodDecoratorContext){
+    addComputedSubscribers(dependencies:string[], context:ClassGetterDecoratorContext){
+        console.log(this);
         if(ReactiveClass.instances>1) return;
         dependencies.forEach(dependency=>{
             let subscriber = ReactiveClass.computedSubscribers.get(dependency);
@@ -45,7 +46,7 @@ export class ReactiveClass{
     }
 
 
-    static batchEffectSubscribers(context:any, paths:string[]){
+    batchEffectSubscribers(paths:string[]){
         const batchedEffects = new Set<string>();
         // runs effects when state changes
         for(let path of paths){
@@ -57,7 +58,7 @@ export class ReactiveClass{
         return batchedEffects;
     }
 
-    static runComputedSubscribers(path:string){
+    runComputedSubscribers(path:string){
         // determines which effect dependent on which path should run if a state is changed
         const paths:string[] = [path];
         const subscribers = ReactiveClass.computedSubscribers.get(path);
@@ -65,14 +66,14 @@ export class ReactiveClass{
         return paths;
     }
 
-    static runSubscribers(context:any, path:string){
+    runSubscribers(path:string){
         // determine which computed were affected and which effects were dependent on them
-        const paths = ReactiveClass.runComputedSubscribers(path);
+        const paths = this.runComputedSubscribers(path);
         // batching effects based on determined path
-        const batchedEffects = ReactiveClass.batchEffectSubscribers(context, paths);
+        const batchedEffects = this.batchEffectSubscribers(paths);
         // running subscribers
         batchedEffects.forEach(effectFnName=>{
-            context[effectFnName].call(context);
+            (this as any)[effectFnName].call(this);
         })
     }
 };
