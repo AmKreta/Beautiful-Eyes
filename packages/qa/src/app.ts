@@ -8,6 +8,7 @@ class Button extends ReactiveClass{
 
     @State() a = {
         name:'amresh',
+        c:0,
         value:[
             {val:1},
             {val:2},
@@ -27,12 +28,16 @@ class Button extends ReactiveClass{
     } 
 
     @Computed(['a.name']) get name(){
-        return 'amk';
+        return this.a.name;
     }
 
     @Effect(['name']) 
-    onBChange(){
-        console.log('b changed, new val ', this.b);
+    onNameChange(){
+        console.log('name changed, new val ', this.name);
+    }
+
+    @Effect(['a.c']) onCChange(){
+        console.log(this.a.c);
     }
 
     constructor(){
@@ -49,13 +54,11 @@ class Button extends ReactiveClass{
 
 const root = document.getElementById('root')!;
 const btn = new Button();
+(window as any).b = btn;
 bootstrap(root, btn);
 
 let x = new Button();
 
 // should trigger effect
 btn.a.name = "I love neha singh";
-
-// should'nt trigger effect
-btn.c = [1,2];
-
+btn.a.name = "I love neha singh";
