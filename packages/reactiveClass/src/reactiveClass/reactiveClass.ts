@@ -1,3 +1,5 @@
+import { BatchedUpdates } from "@beautiful-eyes/lib/src/Proxy/taskQueue/taskQueue";
+
 export type Subscribers = Map<string, Set<string>> | null;
 
 // effectSubscribers: dependency: state | computed -> effect
@@ -7,10 +9,11 @@ export type Subscribers = Map<string, Set<string>> | null;
 // when state change, determine what path of state was changes, and which computed were affected, store them in paths
 // run loop on paths, run effectSubscribers for each path
 
-export class ReactiveClass{
+export class ReactiveClass implements BatchedUpdates{
 
     static readonly effectSubscribers = new Map<string, Set<string>>;
     static readonly computedSubscribers = new Map<string, Set<string>>;
+    batchedEffects:Set<string> | null = null;
 
     static instances = 0;
 
@@ -33,7 +36,6 @@ export class ReactiveClass{
 
     // dependency state | computed -> [effectNames]
     addComputedSubscribers(dependencies:string[], context:ClassGetterDecoratorContext){
-        console.log(this);
         if(ReactiveClass.instances>1) return;
         dependencies.forEach(dependency=>{
             let subscriber = ReactiveClass.computedSubscribers.get(dependency);
@@ -47,15 +49,16 @@ export class ReactiveClass{
 
 
     batchEffectSubscribers(paths:string[]){
-        const batchedEffects = new Set<string>();
+        if(!this.batchedEffects){
+            this.batchedEffects = new Set<string>();
+        }
         // runs effects when state changes
         for(let path of paths){
             const subscribers = ReactiveClass.effectSubscribers.get(path);
             subscribers?.forEach((effectFnName:string)=>{
-                batchedEffects.add(effectFnName);
+                this.batchedEffects!.add(effectFnName);
             });
         }
-        return batchedEffects;
     }
 
     runComputedSubscribers(path:string){
@@ -70,10 +73,13 @@ export class ReactiveClass{
         // determine which computed were affected and which effects were dependent on them
         const paths = this.runComputedSubscribers(path);
         // batching effects based on determined path
-        const batchedEffects = this.batchEffectSubscribers(paths);
+        this.batchEffectSubscribers(paths);
+    }
+
+    comitBatchedItems(){
         // running subscribers
-        batchedEffects.forEach(effectFnName=>{
-            (this as any)[effectFnName].call(this);
-        })
+        this.batchedEffects?.forEach(effectFnName=>{
+            (this as any)[effectFnName]?.call(this);
+        });
     }
 };
