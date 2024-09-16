@@ -78,8 +78,10 @@ export class ReactiveClass implements BatchedUpdates{
 
     comitBatchedItems(){
         // running subscribers
-        this.batchedEffects?.forEach(effectFnName=>{
+        if(!this.batchedEffects) return;
+        this.batchedEffects.forEach(effectFnName=>{
             (this as any)[effectFnName]?.call(this);
         });
+        this.batchedEffects = null;
     }
 };
