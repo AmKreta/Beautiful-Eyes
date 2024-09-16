@@ -28,6 +28,15 @@ export class Proxify{
                     });
                 }
                 return res;
+            },
+            deleteProperty(target, prop){
+                const res = Reflect.deleteProperty(target, prop);
+                Proxify.taskQueue.push({
+                    cb:cb!,
+                    context: contextObj,
+                    args:{path: target[PROXY_OBJECT_KEYS.path]+`.${String(prop)}`}
+                });
+                return res;
             }
         } as const;
     }
