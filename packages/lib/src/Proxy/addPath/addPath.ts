@@ -5,5 +5,6 @@ export function addPath(obj:any, path:string){
         value: path,
         enumerable: false,
         writable: true,
+        configurable:false
     });
 }

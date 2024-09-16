@@ -4,6 +4,7 @@ export function addParent(obj:any, parent:any = null){
     Object.defineProperty(obj, PROXY_OBJECT_KEYS.parent, {
         value: parent,
         writable: true, 
-        enumerable: false
+        enumerable: false,
+        configurable:false
     });
 }
