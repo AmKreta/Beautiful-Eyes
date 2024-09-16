@@ -30,7 +30,14 @@ export class TaskQueue {
             this.tasks.set(task.context, contextTasks);
         }
         else{
-            const contextPathTasks = contextTasks.get(task.args.path)!;
+            let contextPathTasks = contextTasks.get(task.args.path);
+            if(!contextPathTasks){
+                // this can heppen when context state's value doesn't change itself but 
+                // one of it's properties change
+                // eg when using array.push, it's length property is updates, but array is not changes (same ref)
+                contextPathTasks = new Queue<Task>();
+                contextTasks.set(task.args.path, contextPathTasks);
+            }
             contextPathTasks.push(task);
         }
         this.runTasksAsIdleCallback();
