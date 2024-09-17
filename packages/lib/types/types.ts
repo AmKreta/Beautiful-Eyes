@@ -31,3 +31,5 @@ export interface INode{
     children: INode[];
     parent: INode | null;
 };
+
+export type DependencyFn = (ctx:any) => any[];

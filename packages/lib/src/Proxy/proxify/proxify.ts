@@ -3,39 +3,21 @@ import {updateParent} from "../updateParent/updateParent";
 import { addPath } from "../addPath/addPath";
 import { PROXY_OBJECT_KEYS } from "../proxyObjectKeys/proxyObjectKeys";
 import { Types } from "../../types/types";
-import {TaskQueue, MutationCallback} from "../taskQueue/taskQueue";
 
 export class Proxify{
-    public static readonly taskQueue = new TaskQueue();
     
     private static proxyHandler:ProxyHandler<any> | null = null;
 
-    private static getProxyHandler(contextObj:any, cb?:MutationCallback):ProxyHandler<any>{
+    private static getProxyHandler(contextObj:any, cb?:Function):ProxyHandler<any>{
         return  {
-            get(target, prop, receiver){
-                const res = Reflect.get(target, prop, receiver);
-                Proxify.updatePathKeys(res, target, prop);
-                return res;
-            },
             set(target, prop, value, receiver){ 
                 const res = Reflect.set(target, prop, value, receiver);
-                Proxify.updatePathKeys(res, target, prop);
-                if(prop !== PROXY_OBJECT_KEYS.path && prop!==PROXY_OBJECT_KEYS.parent && cb){
-                    Proxify.taskQueue.push({
-                        cb,
-                        context: contextObj,
-                        args:{path: target[PROXY_OBJECT_KEYS.path]+`.${String(prop)}`}
-                    });
-                }
+                cb?.();
                 return res;
             },
             deleteProperty(target, prop){
                 const res = Reflect.deleteProperty(target, prop);
-                Proxify.taskQueue.push({
-                    cb:cb!,
-                    context: contextObj,
-                    args:{path: target[PROXY_OBJECT_KEYS.path]+`.${String(prop)}`}
-                });
+                cb?.();
                 return res;
             }
         } as const;
@@ -113,7 +95,7 @@ export class Proxify{
         return  Proxify.makeProxy(set);
     }
     
-    static get(obj:any, stateName:string, contextObj: any, parent:object|null = null, cb?:MutationCallback) : typeof obj{
+    static get(obj:any, stateName:string, contextObj: any, parent:object|null = null, cb?:Function) : typeof obj{
         if(!obj) return obj; // empty string, 0, null undefined etc;
         if(Types.isNumber(obj) || Types.isString(obj)) return obj;
 
