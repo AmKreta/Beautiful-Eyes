@@ -1,9 +1,12 @@
 import {bootstrap, ReactiveClass, Component, Effect, State, Computed} from '@beautiful-eyes/core';
+import amk from './app.template.html';
 
-@Component({
-    useTemplate:'./app.template.html',
-    useStyleSheets:[]
-})
+console.log(amk);
+
+// @Component({
+//     useTemplate:'./app.template.html',
+//     useStyleSheets:[]
+// })
 class Button extends ReactiveClass{
     @State() a = [0,1,2,3,4];
     @State() b = {key:'val'};

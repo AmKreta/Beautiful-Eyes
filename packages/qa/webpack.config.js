@@ -39,7 +39,7 @@ module.exports = {
         rules: [
             {
                 test:/\.template.html/,
-                use : ['babel-loader']
+                use : ['@beautiful-eyes/template-compiler/dist/index.js']
             },
             {
                 test:/\.(ts|tsx)$/,
