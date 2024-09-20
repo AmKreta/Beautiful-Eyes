@@ -1,1 +1,1 @@
-declare module '*.html';
+declare module '*.template.be';

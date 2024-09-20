@@ -1,5 +1,5 @@
 import {bootstrap, ReactiveClass, Component, Effect, State, Computed} from '@beautiful-eyes/core';
-import template from './app.template.html';
+import template from './app.template.be';
 
 @Component({
     useTemplate:template,

@@ -38,7 +38,7 @@ module.exports = {
     module: {
         rules: [
             {
-                test:/\.template.html/,
+                test:/\.template.be/,
                 use : ['@beautiful-eyes/template-compiler/dist/index.js']
             },
             {
