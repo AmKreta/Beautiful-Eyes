@@ -1,3 +1,4 @@
+import { Visitor } from "../../visitors/visitor/visitor";
 import { astNode } from "../astNode/astNode";
 import { HtmlElement } from "../HtmlElement/HtmlElement";
 
@@ -8,5 +9,9 @@ export class HtmlChild extends astNode{
         private isHtmlElement:boolean = false
     ){
         super();
+    }
+
+    acceptVisitor(visitor: Visitor) {
+        
     }
 }

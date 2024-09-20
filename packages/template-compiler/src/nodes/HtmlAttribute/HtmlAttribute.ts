@@ -1,3 +1,4 @@
+import { Visitor } from "../../visitors/visitor/visitor";
 import { astNode } from "../astNode/astNode";
 
 export class HtmlAttribute extends astNode{
@@ -7,5 +8,9 @@ export class HtmlAttribute extends astNode{
         private isInterpolation:boolean = false
     ){
         super();
+    }
+
+    acceptVisitor(visitor: Visitor) {
+        
     }
 }
