@@ -16,6 +16,6 @@
   },
   "dependencies": {
     "@beautiful-eyes/lib":"*",
-    "@beautiful-eyes/reactiveclass":"*",
+    "@beautiful-eyes/reactiveclass":"*"
   }
 }
