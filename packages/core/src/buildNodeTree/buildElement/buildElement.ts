@@ -1,4 +1,4 @@
-import { IHtmlObj } from "@beautiful-eyes/lib";
+import { htmlObj } from "@beautiful-eyes/lib";
 import buildNodeTree from "../buildNodeTree";
 
 export default function buildElement(htmlObj:IHtmlObj){
