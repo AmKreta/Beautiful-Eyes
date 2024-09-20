@@ -16,6 +16,7 @@ export class ReactiveClass implements BatchedUpdates{
 
     static readonly effectSubscribers = new Map<DependencyFn, EffectFnName>;
     static readonly computedSubscribers = new Map<string, Set<string>>;
+    otherSubscriptions:Function[] = [];
     static instances = 0;
 
     batchedEffects:Set<string> | null = null;
@@ -62,6 +63,9 @@ export class ReactiveClass implements BatchedUpdates{
             }
             this.effectDepFnPreviousValue.set(dependency, latestValue);
         });
+        this.otherSubscriptions.forEach(subscription=>{
+            subscription.call(this)
+        });
     }
 
     comitBatchedItems(){
@@ -71,5 +75,9 @@ export class ReactiveClass implements BatchedUpdates{
         //     (this as any)[effectFnName]?.call(this);
         // });
         // this.batchedEffects = null;
+    }
+
+    addOtherSubscription(fn:Function){
+        this.otherSubscriptions.push(fn);
     }
 };

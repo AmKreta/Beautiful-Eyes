@@ -1,4 +1,4 @@
 
 export default function bootstrap(el:HTMLElement, rootNode:any){
-   el.appendChild(rootNode.nodeTree);
+   el.appendChild(rootNode.init());
 }

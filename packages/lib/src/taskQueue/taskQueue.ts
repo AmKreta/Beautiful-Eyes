@@ -33,13 +33,28 @@ export class TaskQueue {
                     this.runTask(context, cb);
                     contextTasks.delete(cb);
                 }
-                else{
-                    this.idleCallbackRunning = false;
-                    this.runTasksAsIdleCallback();
-                    return;
-                }
+                else break;
+            }
+
+            if(contextTasks.size){
+                // ie deadline.timeRemaining() is still > 0
+                this.idleCallbackRunning = false;
+                this.runTasksAsIdleCallback();
+                return;
+            }
+            else {
+                this.tasks.delete(context);
+            }
+            
+            if(this.tasks.size){
+                // to schedule new task if still tasks are left
+                this.idleCallbackRunning = false;
+                this.runTasksAsIdleCallback();
+                return;
             }
         }
+        // all tasks are completed
+        this.idleCallbackRunning = false;
     }
 
     runTask(context:any, cb:Function){

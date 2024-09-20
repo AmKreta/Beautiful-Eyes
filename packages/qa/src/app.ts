@@ -8,6 +8,7 @@ import template from './app.template.html';
 class Button extends ReactiveClass{
     @State() a = [0,1,2,3,4];
     @State() b = {key:'val'};
+    @State() count = 5;
 
     @Computed()
     get sumA(){
@@ -29,7 +30,16 @@ class Button extends ReactiveClass{
         console.log(`sum of array a changed from`, oldValue, 'to', this.sumA);
     }
 
-    
+    incrementCount(){
+        const newVal = this.count+1;
+        this.count = newVal;
+        btn.a[1]++;
+    }
+
+    @Effect((ctx:Button)=>[ctx.count])
+    log(){
+        console.log(this.count);
+    }
 }
 
 
@@ -37,11 +47,11 @@ const root = document.getElementById('root')!;
 const btn = new Button();
 bootstrap(root, btn);
 
-btn.a[0] = 1;
-btn.a[1] = 2;
+// btn.a[0] = 1;
+// btn.a[1] = 2;
 
-btn.a[0] = 100;
-btn.a[1] = 200;
+// btn.a[0] = 100;
+// btn.a[1] = 200;
 
 
 

@@ -3,7 +3,7 @@ import { Parser } from './src/parser/parser';
 import stringify from './src/stringify/stringify';
 import { CodeGenerator } from './src/visitors/codeGenerator/codeGenerator';
 
-function printTokens(source:string){
+export function printTokens(source:string){
     const lexer = new Lexer(source);
     let currentToken = lexer.getNextToken();
     while(currentToken.tokenType!==TOKEN_TYPE.END_OF_FILE){
@@ -22,10 +22,10 @@ export default function transform(source:string){
     return "module.exports = "+stringifiedRes;
 }
 
-transform(`<div id={b.key} Click={amk}>
-   hello {b.key}
-   <button>clicked {count} times</button>
+// const val = transform(`<div id={b.key} Click={amk}>
+//    hello {b.key}
+//    <button>clicked {count} times</button>
+// </div>
+// `)
 
-
-
-</div>`)
+// console.log(val);

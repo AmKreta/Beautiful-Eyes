@@ -1,7 +1,9 @@
-export type htmlObj = {
+type AttributeObj = Record<string, string | Function>
+
+export type HtmlObj = {
     tagName:string, 
-    attributes:Record<string, string>, 
-    children:(string|htmlObj)[]
+    attributes:AttributeObj, 
+    children:(string|HtmlObj | Function)[]
 };
 
 export type DependencyFn = (ctx:any) => any[];
