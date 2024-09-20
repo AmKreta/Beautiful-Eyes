@@ -16,13 +16,13 @@ export class Lexer{
     }
 
     private skipWhitespace(){
-        while(this.source[this.currentPosition]===' ' || this.source[this.currentPosition]===''){
+        while(this.currentPosition<this.source.length && (this.source[this.currentPosition]===' ' || this.source[this.currentPosition]==='')){
             this.advance();
         }
     }
 
     private skipNextLine(){
-        while(this.source[this.currentPosition]==='\n' || this.source[this.currentPosition]==='\t'){
+        while(this.currentPosition<this.source.length && (this.source[this.currentPosition]==='\n' || this.source[this.currentPosition]==='\t')){
             this.advance();
         }
     }
@@ -33,12 +33,12 @@ export class Lexer{
     }
 
     public getNextToken(){
-        if(this.currentPosition > this.source.length-1){
-            return TokenFactory.createFromType(TOKEN_TYPE.END_OF_FILE);
-        }
         this.skipSkipable();
         if(this.source[this.currentPosition]==='\n'){
             this.skipSkipable();
+        }
+        if(this.currentPosition >= this.source.length){
+            return TokenFactory.createFromType(TOKEN_TYPE.END_OF_FILE);
         }
         switch(this.source[this.currentPosition]){
             case '<':

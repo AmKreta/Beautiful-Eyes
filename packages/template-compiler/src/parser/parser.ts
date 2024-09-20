@@ -91,7 +91,12 @@ export class Parser{
     parse() : astNode[]{
         const nodes:astNode[] = [];
         while(this.currentToken.tokenType!==TOKEN_TYPE.END_OF_FILE){
-            nodes.push(this.parseTag());
+            if(this.currentToken.tokenType===TOKEN_TYPE.STRING){
+                this.currentToken.value && nodes.push(new HtmlElement('textNode',[], [new HtmlChild(this.currentToken.value)]))
+            }
+            else{
+                nodes.push(this.parseTag())
+            };
         }
         return nodes;
     }
