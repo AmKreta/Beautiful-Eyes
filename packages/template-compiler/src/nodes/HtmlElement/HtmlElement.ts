@@ -1,4 +1,4 @@
-import { htmlObj } from "@beautiful-eyes/lib/types/types"
+import { HtmlObj } from "@beautiful-eyes/lib/types/types"
 import { Visitor } from "../../visitors/visitor/visitor";
 import { astNode } from "../astNode/astNode";
 import { HtmlAttribute } from "../HtmlAttribute/HtmlAttribute";
@@ -19,7 +19,7 @@ export class HtmlElement extends astNode{
             const {attributeName, attributeValue} = attr.acceptVisitor(visitor);
             attributes[attributeName] = attributeValue;
         });
-        const children:(htmlObj | string)[]= [];
+        const children:(HtmlObj | string)[]= [];
         this.children.forEach(child=>{
             children.push(child.acceptVisitor(visitor));
         });

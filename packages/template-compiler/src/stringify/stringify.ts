@@ -1,12 +1,12 @@
-import { htmlObj } from "@beautiful-eyes/lib/types/types"
+import { HtmlObj } from "@beautiful-eyes/lib/types/types"
 
-export default function stringify(nodes:htmlObj[]){
+export default function stringify(nodes:HtmlObj[]){
     let res = '';
     for(let node of nodes){
-        res+=`{tag:"${node.tagName}", attributes:{`;
+        res+=`{tagName:"${node.tagName}", attributes:{`;
         for(let key in node.attributes){
             res+=`${key}:`;
-            let val = node.attributes[key];
+            let val = node.attributes[key] as string;
             if(val.startsWith('function(')) res+=val+',';
             else res+=`"${val}",`;
         }
@@ -17,7 +17,7 @@ export default function stringify(nodes:htmlObj[]){
             else res+=`"${child}",`;
            }
            else{
-            res+=stringify(child as any);
+            res+=stringify([child as any]);
            }
         }
         res+="]}";

@@ -52,7 +52,7 @@ export default function interpolationTranspiler(str:string){
             throw new Error(`variable name cannot start with ${str[0]}`);
         }
         let res = '';
-        while(i<str.length && (/^[a-zA-Z_$]$/.test(str[i]))){
+        while(i<str.length && (/^[a-zA-Z_$.]$/.test(str[i]))){
             res+=str[i++];
         }
         res = `this.${res}`;

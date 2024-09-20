@@ -22,7 +22,7 @@ export class Lexer{
     }
 
     private skipNextLine(){
-        while(this.source[this.currentPosition]==='\n'){
+        while(this.source[this.currentPosition]==='\n' || this.source[this.currentPosition]==='\t'){
             this.advance();
         }
     }
@@ -33,10 +33,13 @@ export class Lexer{
     }
 
     public getNextToken(){
-        if(this.currentPosition >= this.source.length-1){
+        if(this.currentPosition > this.source.length-1){
             return TokenFactory.createFromType(TOKEN_TYPE.END_OF_FILE);
         }
         this.skipSkipable();
+        if(this.source[this.currentPosition]==='\n'){
+            this.skipSkipable();
+        }
         switch(this.source[this.currentPosition]){
             case '<':
                 this.advance();
@@ -65,7 +68,8 @@ export class Lexer{
                 if(isText(this.source[this.currentPosition])){
                     return TokenFactory.createFromTypeAndValue(TOKEN_TYPE.STRING, this.readText());
                 }
-            throw new Error(`unidentified token ${this.currentPosition++}`);
+            const currToken = this.source[this.currentPosition]
+            throw new Error(`unidentified token ${currToken}`);
         }
     }
 
