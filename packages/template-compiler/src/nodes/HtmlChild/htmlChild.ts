@@ -12,6 +12,12 @@ export class HtmlChild extends astNode{
     }
 
     acceptVisitor(visitor: Visitor) {
-        
+       if(this.isInterpolation){
+        return `function(){return ${this.content}}`
+       }
+       if(this.isHtmlElement){
+        return (this.content as HtmlElement).acceptVisitor(visitor) // visitor.visitHtmlElement(visitor);
+       }
+       return this.content as string;
     }
 }

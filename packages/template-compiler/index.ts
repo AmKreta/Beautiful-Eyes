@@ -1,5 +1,6 @@
 import {Lexer, TOKEN_TYPE} from './src';
 import { Parser } from './src/parser/parser';
+import { CodeGenerator } from './src/visitors/codeGenerator/codeGenerator';
 
 const str = `
     <div id="id" name={"Amresh"}> hello {name} </div>
@@ -18,4 +19,7 @@ const lexer = new Lexer(str);
 const parser = new Parser(lexer);
 const ast = parser.parse();
 
-console.log(ast);
+const codeGen = new CodeGenerator();
+const res = codeGen.eval(ast);
+
+console.log(res[1].children);
