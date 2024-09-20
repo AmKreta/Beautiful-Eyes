@@ -1,4 +1,4 @@
-import { htmlObj } from "../types";
+import { htmlObj } from "@beautiful-eyes/lib/types/types"
 
 export default function stringify(nodes:htmlObj[]){
     let res = '';

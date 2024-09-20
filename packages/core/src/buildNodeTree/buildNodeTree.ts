@@ -1,5 +1,5 @@
-import { IHtmlObj, NODE_TYPE } from "@beautiful-eyes/lib";
 import buildElement from "./buildElement/buildElement";
+import { htmlObj } from "@beautiful-eyes/lib/types/types"
 
 function buildComponent(){
 
@@ -9,14 +9,10 @@ function buildFragment(){
 
 }
 
-export default function buildNodeTree(htmlObj:IHtmlObj){
+export default function buildNodeTree(htmlObj:htmlObj){
     let el;
-    if(htmlObj.type === NODE_TYPE.ELEMENT){
+    if(/^[a-z]/.test(htmlObj.tagName[0])){
         el = buildElement(htmlObj);
-    }
-
-    if(htmlObj.type === NODE_TYPE.TEXT_NODE){
-        el = document.createTextNode(htmlObj.children as string);
     }
 
     return el;

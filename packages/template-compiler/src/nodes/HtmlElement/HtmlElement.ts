@@ -1,4 +1,4 @@
-import { htmlObj } from "../../types";
+import { htmlObj } from "@beautiful-eyes/lib/types/types"
 import { Visitor } from "../../visitors/visitor/visitor";
 import { astNode } from "../astNode/astNode";
 import { HtmlAttribute } from "../HtmlAttribute/HtmlAttribute";
