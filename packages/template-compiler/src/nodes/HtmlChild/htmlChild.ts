@@ -1,3 +1,4 @@
+import interpolationTranspiler from "../../interpolationTranspiler/interpolationTranspiler";
 import { Visitor } from "../../visitors/visitor/visitor";
 import { astNode } from "../astNode/astNode";
 import { HtmlElement } from "../HtmlElement/HtmlElement";
@@ -13,7 +14,7 @@ export class HtmlChild extends astNode{
 
     acceptVisitor(visitor: Visitor) {
        if(this.isInterpolation){
-        return `function(){return ${this.content}}`
+        return `function(){return ${interpolationTranspiler(this.content as string)}}`
        }
        if(this.isHtmlElement){
         return (this.content as HtmlElement).acceptVisitor(visitor) // visitor.visitHtmlElement(visitor);
