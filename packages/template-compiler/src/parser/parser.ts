@@ -77,7 +77,6 @@ export class Parser{
         else{
             this.eat(TOKEN_TYPE.TAG_CLOSE);
             const children:(HtmlChild | HtmlElement)[] = [];
-            let peek = this.lexer.peek(2);
             while(!((this.currentToken.tokenType as any)===TOKEN_TYPE.TAG_OPEN && this.lexer.peek()==='/')){
                 children.push(this.parseChildren());
             }
