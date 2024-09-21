@@ -18,7 +18,6 @@ export default function transform(source:string){
     const ast = parser.parse();
     const codeGen = new CodeGenerator();
     const res = codeGen.eval(ast);
-    console.log(res);
     const stringifiedRes = stringify(res);
     return "module.exports = "+stringifiedRes;
 }

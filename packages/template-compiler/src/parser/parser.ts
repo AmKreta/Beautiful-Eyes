@@ -96,7 +96,6 @@ export class Parser {
             if (this.currentToken.tokenType ===TOKEN_TYPE.TAG_CLOSE_SLASH) {
                 this.eat(TOKEN_TYPE.TAG_CLOSE_SLASH);
                 this.eat(TOKEN_TYPE.TAG_CLOSE);
-                console.log('ran')
                 return new HtmlElement(tagNAme, attributes);
             }
         }
