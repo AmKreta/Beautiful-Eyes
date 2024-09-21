@@ -7,7 +7,7 @@ export type HtmlObj = {
     attributes:AttributeObj,
     eventHandlers:EventHandlerObject,
     ref:RefObject,
-    children:(string|HtmlObj | Function)[]
+    children:(string| HtmlObj | Function)[]
 };
 
 export type DependencyFn = (ctx:any) => any[];

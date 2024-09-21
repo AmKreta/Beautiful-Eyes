@@ -1,7 +1,7 @@
 import { HtmlObj } from "@beautiful-eyes/lib/types/types"
 
 type ComponentOptions = {
-    useTemplate:HtmlObj,
+    useTemplate:HtmlObj[],
     useStyleSheets:string[]
 }
 
@@ -10,7 +10,7 @@ type Constructor<T = {}> = new(...arga:any[])=>T;
 export default function Component(options:ComponentOptions){
     return function<T extends Constructor>(target:T, context:ClassDecoratorContext):T{
         class Component extends target{
-            static template:HtmlObj = options.useTemplate;
+            static template:HtmlObj[] = options.useTemplate;
             nodeTree:any;
             reactiveElements:Map<HTMLElement, Function> = new Map();
             
@@ -20,7 +20,7 @@ export default function Component(options:ComponentOptions){
 
             init(){
                 if(!Component.template) throw new Error("template is required for " + context.name);
-                const nodeTree = this.buildNodeTree(Component.template);
+                const nodeTree = Component.template.map((htmlObj:HtmlObj)=>this.buildNodeTree(htmlObj));
                 (this as any).addOtherSubscription?.(()=>{
                     this.reactiveElements.forEach((fn:Function,element:HTMLElement) => {
                         fn.call(this);

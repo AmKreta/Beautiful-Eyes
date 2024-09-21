@@ -18,14 +18,20 @@ export default function transform(source:string){
     const ast = parser.parse();
     const codeGen = new CodeGenerator();
     const res = codeGen.eval(ast);
+    console.log(res);
     const stringifiedRes = stringify(res);
     return "module.exports = "+stringifiedRes;
 }
 
-// const val = transform(`<div id={b.key} Click={amk}>
-//    hello {b.key}
-//    <button>clicked {count} times</button>
-// </div>
-// `)
+const val = transform(`<div id={b.key} @click={incrementCount} #amk>
+   hello {b.key}
+   <button>clicked {count} times</button>
+</div>
+
+<span>
+   <button>hello</button>
+</span>`)
+
+console.log(val);
 
 // console.log(val);

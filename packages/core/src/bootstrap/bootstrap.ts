@@ -1,4 +1,7 @@
 
 export default function bootstrap(el:HTMLElement, rootNode:any){
-   el.appendChild(rootNode.init());
+   const roots = rootNode.init();
+   const frag = document.createDocumentFragment();
+   roots.forEach((el:HTMLElement)=>frag.appendChild(el));
+   el.appendChild(frag);
 }
