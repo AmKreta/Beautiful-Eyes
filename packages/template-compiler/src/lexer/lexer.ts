@@ -1,5 +1,5 @@
 import { TOKEN_TYPE, TOKEN_VALUE, TokenFactory, Token } from "../token";
-import { getDelimeterForAttributes, isText, isValidAttributeName, isValidTagName } from "./util";
+import { isText } from "./util";
 
 export class Lexer{
     private currentPosition = 0;
