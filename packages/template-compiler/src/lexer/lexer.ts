@@ -16,13 +16,13 @@ export class Lexer{
     }
 
     private skipWhitespace(){
-        while(this.currentPosition<this.source.length && (this.source[this.currentPosition]===' ' || this.source[this.currentPosition]==='')){
+        while(this.currentPosition<this.source.length && (this.currentChar===' ' || this.currentChar==='')){
             this.advance();
         }
     }
 
     private skipNextLine(){
-        while(this.currentPosition<this.source.length && (this.source[this.currentPosition]==='\n' || this.source[this.currentPosition]==='\t')){
+        while(this.currentPosition<this.source.length && (this.currentChar==='\n' || this.currentChar==='\t')){
             this.advance();
         }
     }
@@ -32,15 +32,19 @@ export class Lexer{
         this.skipWhitespace();
     }
 
+    private get currentChar(){
+        return this.source[this.currentPosition];
+    }
+
     public getNextToken(){
         this.skipSkipable();
-        if(this.source[this.currentPosition]==='\n'){
+        if(this.currentChar==='\n'){
             this.skipSkipable();
         }
         if(this.currentPosition >= this.source.length){
             return TokenFactory.createFromType(TOKEN_TYPE.END_OF_FILE);
         }
-        switch(this.source[this.currentPosition]){
+        switch(this.currentChar){
             case '<':
                 this.advance();
                 return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.TAG_OPEN);
@@ -65,10 +69,10 @@ export class Lexer{
                 this.advance();
                 return TokenFactory.createFromType(TOKEN_TYPE.DOUBLE_QUOTE);
             default:
-                if(isText(this.source[this.currentPosition])){
+                if(isText(this.currentChar)){
                     return TokenFactory.createFromTypeAndValue(TOKEN_TYPE.STRING, this.readText());
                 }
-            const currToken = this.source[this.currentPosition]
+            const currToken = this.currentChar
             throw new Error(`unidentified token ${currToken}`);
         }
     }
@@ -79,7 +83,7 @@ export class Lexer{
             delimeters.push(' '); // <div id='a' , it will read only till div
         }
         let res='';
-        while(this.currentPosition< this.source.length && !delimeters.includes(this.source[this.currentPosition])){
+        while(this.currentPosition< this.source.length && !delimeters.includes(this.currentChar)){
             res+=this.source[this.currentPosition++];
         }
        return res;
@@ -87,20 +91,20 @@ export class Lexer{
 
     private readJSXInterpolation(){
         // parse context within {}
-        if(this.source[this.currentPosition]!=='{'){
-            throw new Error(`expected '{' got '${this.source[this.currentPosition]}'`);
+        if(this.currentChar!=='{'){
+            throw new Error(`expected '{' got '${this.currentChar}'`);
         }
         let res = '';
         this.currentPosition++;
-        while(this.currentPosition<this.source.length && this.source[this.currentPosition]!=='}'){
-            if(this.source[this.currentPosition]==='`'){
+        while(this.currentPosition<this.source.length && (this.currentChar as any)!=='}'){
+            if((this.currentChar as any)==='`'){
                res+= this.readStringInterpolation();
             }
             else{
                 res+=this.source[this.currentPosition++];
             }
         }
-        if(this.source[this.currentPosition]!=='}'){
+        if((this.currentChar as any)!=='}'){
             throw new Error(`expected '}' got '${TOKEN_VALUE[TOKEN_TYPE.END_OF_FILE]}'`);
         }
         this.advance(); // skipping closing '}'
@@ -109,13 +113,13 @@ export class Lexer{
 
     private readStringInterpolation(){
         //parse content withing ``
-        if(this.source[this.currentPosition]!=='`'){
-            throw new Error(`expected '\`' got '${this.source[this.currentPosition]}'`);
+        if(this.currentChar!=='`'){
+            throw new Error(`expected '\`' got '${this.currentChar}'`);
         }
         let res = '`';
         this.currentPosition++;
-        while(this.currentPosition<this.source.length && this.source[this.currentPosition]!=='`'){
-            if(this.source[this.currentPosition]==='$'){
+        while(this.currentPosition<this.source.length && this.currentChar!=='`'){
+            if(this.currentChar==='$'){
                this.currentPosition++;
                res+= `\${${this.readJSXInterpolation()}}`;
             }
@@ -123,7 +127,7 @@ export class Lexer{
                 res+=this.source[this.currentPosition++];
             }
         }
-        if(this.source[this.currentPosition]!=='`'){
+        if(this.currentChar!=='`'){
             throw new Error(`expected '\`' got '${TOKEN_VALUE[TOKEN_TYPE.END_OF_FILE]}'`);
         }
         this.currentPosition++; // skipping closing `
