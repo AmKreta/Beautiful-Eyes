@@ -1,6 +1,6 @@
 import { Lexer } from "../lexer/lexer";
 import { astNode } from "../nodes/astNode/astNode";
-import { HtmlAttribute } from "../nodes/HtmlAttribute/HtmlAttribute";
+import { ATTRIBUTE_TYPE, HtmlAttribute } from "../nodes/HtmlAttribute/HtmlAttribute";
 import { HtmlChild } from "../nodes/HtmlChild/htmlChild";
 import { HtmlElement } from "../nodes/HtmlElement/HtmlElement";
 import { Token, TOKEN_TYPE, TOKEN_VALUE } from "../token";
@@ -42,21 +42,34 @@ export class Parser{
     }
 
     parseAttribute(){
+        let isEventListener = false, isRef = false;
+        if(this.currentToken.tokenType === TOKEN_TYPE.AT_THE_RATE){
+            isEventListener = true;
+            this.eat(TOKEN_TYPE.AT_THE_RATE);
+        }
+        else if(this.currentToken.tokenType === TOKEN_TYPE.HASH){
+            isRef = true;
+            this.eat(TOKEN_TYPE.HASH);
+        }
         const attributeName = this.currentToken.value;
         this.eat(TOKEN_TYPE.STRING);
+        if(isRef){
+            return new HtmlAttribute(attributeName, '', false, ATTRIBUTE_TYPE.REF);
+        }
         this.eat(TOKEN_TYPE.ASSIGNMENT);
+        const tagType = isEventListener?ATTRIBUTE_TYPE.EVENT_HANDLER:ATTRIBUTE_TYPE.VALUE;
         if([TOKEN_TYPE.SINGLE_QUOTE, TOKEN_TYPE.DOUBLE_QUOTE].includes(this.currentToken.tokenType)){
             this.eat(this.currentToken.tokenType); // it's either ' or ""
             const val = this.currentToken.value;
             this.eat(TOKEN_TYPE.STRING);
             this.eat(this.currentToken.tokenType);
-            return new HtmlAttribute(attributeName, val);
+            return new HtmlAttribute(attributeName, val, false, tagType);
         }
         else if(this.currentToken.tokenType===TOKEN_TYPE.INTERPOLATION){
             // interpolation
             const val = this.currentToken.value;
             this.eat(TOKEN_TYPE.INTERPOLATION);
-            return new HtmlAttribute(attributeName, val, true);
+            return new HtmlAttribute(attributeName, val, true, tagType);
         }
         throw new Error(`expected string or interpolation got ${this.currentToken}`)
     }
@@ -66,8 +79,16 @@ export class Parser{
         const tagNAme = this.currentToken.value;
         this.eat(TOKEN_TYPE.STRING);
         const attributes:HtmlAttribute[] = [];
+        const eventHandlers:HtmlAttribute[] = [];;
+        let ref:HtmlAttribute | null = null;
         while(this.currentToken.tokenType!==TOKEN_TYPE.TAG_CLOSE){
-            attributes.push(this.parseAttribute());
+            const attr = this.parseAttribute();
+            if(attr.attributeType===ATTRIBUTE_TYPE.EVENT_HANDLER) eventHandlers.push(attr);
+            else if(attr.attributeType===ATTRIBUTE_TYPE.REF){
+                if(ref) throw new Error('an element can contain only one ref');
+                else ref = attr;
+            }
+            else attributes.push(attr);
         }
         if(this.lexer.peek()===TOKEN_VALUE[TOKEN_TYPE.TAG_CLOSE_SLASH]){
             this.eat(TOKEN_TYPE.TAG_CLOSE_SLASH);
@@ -84,7 +105,7 @@ export class Parser{
             this.eat(TOKEN_TYPE.TAG_CLOSE_SLASH);
             this.eat(TOKEN_TYPE.STRING);
             this.eat(TOKEN_TYPE.TAG_CLOSE);
-            return new HtmlElement(tagNAme, attributes, children);
+            return new HtmlElement(tagNAme, attributes, children, eventHandlers, ref);
         }
     }
 

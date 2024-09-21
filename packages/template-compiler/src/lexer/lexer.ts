@@ -60,6 +60,12 @@ export class Lexer{
             case '@':
                 this.advance();
                 return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.AT_THE_RATE);
+            case '#':
+                this.advance();
+                return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.HASH);
+            case '$':
+                this.advance();
+                return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.DOLLAR);
             case '{':
                 return TokenFactory.createFromTypeAndValue(TOKEN_TYPE.INTERPOLATION, this.readJSXInterpolation());
             case "'":

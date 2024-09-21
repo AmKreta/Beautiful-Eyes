@@ -1,7 +1,7 @@
 import { HtmlObj } from "@beautiful-eyes/lib/types/types"
 
 export default function stringify(nodes:HtmlObj[]){
-    let res = '';
+    let res = '[';
     for(let node of nodes){
         res+=`{tagName:"${node.tagName}", attributes:{`;
         for(let key in node.attributes){
@@ -20,7 +20,17 @@ export default function stringify(nodes:HtmlObj[]){
             res+=stringify([child as any]);
            }
         }
-        res+="]}";
+        res+="], eventHandlers:{";
+        for(let eventName in node.eventHandlers){
+            let val = node.eventHandlers[eventName] as string;
+            if(val.startsWith('function(')) res+=`${eventName} : ${val}, `;
+            else throw new Error('event handler should be interpolation');
+        }
+        res+="}, ref:";
+        if(node.ref) res+= node.ref;
+        else res+='null';
+        res+='}, '
     }
+    res+=']';
     return res;
 }
