@@ -96,7 +96,7 @@ export class Parser {
             if (this.currentToken.tokenType ===TOKEN_TYPE.TAG_CLOSE_SLASH) {
                 this.eat(TOKEN_TYPE.TAG_CLOSE_SLASH);
                 this.eat(TOKEN_TYPE.TAG_CLOSE);
-                return new HtmlElement(tagNAme, attributes);
+                return new HtmlElement(tagNAme, attributes,[], eventHandlers, null);
             }
         }
         this.eat(TOKEN_TYPE.TAG_CLOSE);
