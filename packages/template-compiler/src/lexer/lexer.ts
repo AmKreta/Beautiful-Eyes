@@ -36,7 +36,7 @@ export class Lexer{
         return this.source[this.currentPosition];
     }
 
-    public getNextToken(){
+    public getNextToken() : Token{
         this.skipSkipable();
         if(this.currentChar==='\n'){
             this.skipSkipable();
@@ -66,15 +66,33 @@ export class Lexer{
             case '$':
                 this.advance();
                 return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.DOLLAR);
+            case '(':
+                this.advance();
+                return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.PARENTHESIS_OPEN);
+            case ')':
+                this.advance();
+                return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.PARENTHESIS_CLOSE);    
             case '{':
-                return TokenFactory.createFromTypeAndValue(TOKEN_TYPE.INTERPOLATION, this.readJSXInterpolation());
+                if([TOKEN_TYPE.PARENTHESIS_CLOSE, TOKEN_TYPE.ELSE].includes(this.prevToken.tokenType)){
+                    // ie not a block node, eg if(condition){ <-
+                    this.advance();
+                    return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.CURLEY_BRACKET_OPEN);
+                }
+                return this.prevToken = TokenFactory.createFromTypeAndValue(TOKEN_TYPE.INTERPOLATION, this.readJSXInterpolation());
+            case '}':
+                this.advance();
+                return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.CURLEY_BRACKET_CLOSE);
             case "'":
                 this.advance();
-                return TokenFactory.createFromType(TOKEN_TYPE.SINGLE_QUOTE);
+                return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.SINGLE_QUOTE);
             case '"':
                 this.advance();
-                return TokenFactory.createFromType(TOKEN_TYPE.DOUBLE_QUOTE);
+                return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.DOUBLE_QUOTE);
             default:
+                switch(this.prevToken.tokenType){
+                    case TOKEN_TYPE.AT_THE_RATE: return this.prevToken =  this.readStructuralDirectives();
+                    case TOKEN_TYPE.PARENTHESIS_OPEN: return this.prevToken =  TokenFactory.createFromTypeAndValue(TOKEN_TYPE.INTERPOLATION, this.readJSXInterpolation('(')); 
+                }
                 if(isText(this.currentChar)){
                     return TokenFactory.createFromTypeAndValue(TOKEN_TYPE.STRING, this.readText());
                 }
@@ -83,26 +101,47 @@ export class Lexer{
         }
     }
 
+    private readStructuralDirectives(){
+        if(isText(this.currentChar)){
+            const text = this.readText();
+            switch(text){
+                case TOKEN_VALUE[TOKEN_TYPE.FOR]: return TokenFactory.createFromType(TOKEN_TYPE.FOR);
+                case TOKEN_VALUE[TOKEN_TYPE.SWITCH]: return TokenFactory.createFromType(TOKEN_TYPE.SWITCH);
+                case TOKEN_VALUE[TOKEN_TYPE.CASE]: return TokenFactory.createFromType(TOKEN_TYPE.CASE);
+                case TOKEN_VALUE[TOKEN_TYPE.IF]: return TokenFactory.createFromType(TOKEN_TYPE.IF);
+                case TOKEN_VALUE[TOKEN_TYPE.ELSE_IF]: return TokenFactory.createFromType(TOKEN_TYPE.ELSE_IF);
+                case TOKEN_VALUE[TOKEN_TYPE.ELSE]: return TokenFactory.createFromType(TOKEN_TYPE.ELSE);
+                default: throw new Error(`expected structural directive, got ${text}`);
+            }
+        }
+        else{
+            throw new Error(`expected text, got ${this.currentChar}`);
+        }
+    }
+
     private readText(){
-        const delimeters = ['"', "'", '{', "<", ">", "="];
+        const delimeters = new Set(['"', "'", '{', "<", ">", "=", '(', ')', '[', ']', ',', ':']);
         if(this.prevToken.tokenType===TOKEN_TYPE.TAG_OPEN){
-            delimeters.push(' '); // <div id='a' , it will read only till div
+            delimeters.add(' '); // <div id='a' , it will read only till div
         }
         let res='';
-        while(this.currentPosition< this.source.length && !delimeters.includes(this.currentChar)){
+        while(this.currentPosition< this.source.length && !delimeters.has(this.currentChar)){
             res+=this.source[this.currentPosition++];
         }
        return res;
     }
 
-    private readJSXInterpolation(){
+    private readJSXInterpolation(enclosedIn:'{' | '(' = '{'){
         // parse context within {}
-        if(this.currentChar!=='{'){
-            throw new Error(`expected '{' got '${this.currentChar}'`);
+        let delimeter = enclosedIn === '{' ? '}' :')'; 
+        if(enclosedIn === '{'){
+            if(this.currentChar!=='{'){
+                throw new Error(`expected '{' got '${this.currentChar}'`);
+            }
+            this.currentPosition++;
         }
         let res = '';
-        this.currentPosition++;
-        while(this.currentPosition<this.source.length && (this.currentChar as any)!=='}'){
+        while(this.currentPosition<this.source.length && (this.currentChar as any)!==delimeter){
             if((this.currentChar as any)==='`'){
                res+= this.readStringInterpolation();
             }
@@ -110,10 +149,18 @@ export class Lexer{
                 res+=this.source[this.currentPosition++];
             }
         }
-        if((this.currentChar as any)!=='}'){
-            throw new Error(`expected '}' got '${TOKEN_VALUE[TOKEN_TYPE.END_OF_FILE]}'`);
+        if(enclosedIn==='{'){
+            if((this.currentChar as any)!=='}'){
+                throw new Error(`expected '}' got '${TOKEN_VALUE[TOKEN_TYPE.END_OF_FILE]}'`);
+            }
+            this.advance(); // skipping closing '}'
         }
-        this.advance(); // skipping closing '}'
+        else{
+            if((this.currentChar as any)!==')'){
+                throw new Error(`expected ')' got '${TOKEN_VALUE[TOKEN_TYPE.END_OF_FILE]}'`);
+            }
+            // no need to skip )
+        }
         return res;
     }
 
@@ -138,6 +185,12 @@ export class Lexer{
         }
         this.currentPosition++; // skipping closing `
         return res;
+    }
+
+    private returnToken(token:Token, advance = 1){
+        advance && this.advance(advance);
+        this.prevToken = token;
+        return token;
     }
 
 }

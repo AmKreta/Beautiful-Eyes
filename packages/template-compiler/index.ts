@@ -22,6 +22,14 @@ export default function transform(source:string){
     return "module.exports = "+stringifiedRes;
 }
 
+printTokens(`@if(condition){
+    <div>{hello}</div>
+}@else-if(condition){
+    <div>{hello}</div>
+}@else{
+    <div>{hello}</div>
+}`)
+
 // const val = transform(`<div class="form-container">
 //    <h2>Create Your Account</h2>
 //    <form id="userForm">

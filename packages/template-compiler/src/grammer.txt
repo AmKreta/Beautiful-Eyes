@@ -23,7 +23,7 @@ IF = @if(INTERPOLATION) STRUCTURAL_DIRECTIVE_BODY
     (@else-if(INTERPOLATION) STRUCTURAL_DIRECTIVE_BODY)*
     (@else) STRUCTURAL_DIRECTIVE_BODY
  
-FOR = @for(INTERPOLATION | let item of array | set | let [key, val] of object | map) STRUCTURAL_DIRECTIVE_BODY
+FOR = @for((value | [value, index]) : ) STRUCTURAL_DIRECTIVE_BODY
 
 SWITCH = @switch(INTERPOLATION){
     (@case(string | number)STRUCTURAL_DIRECTIVE_BODY)*
