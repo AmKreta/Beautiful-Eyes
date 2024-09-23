@@ -7,20 +7,20 @@ import './app.styles.scss'
     useStyleSheets:[]
 })
 class Button extends ReactiveClass{
-    @State() form = {userName:'', password:''};
+    @State() form = {username:'amresh', password:''};
     amk='neha'
 
     onUserNameChange(e:KeyboardEvent){
-        this.form.userName = (e.target as HTMLInputElement)!.value;
+        this.form.username = (e.target as HTMLInputElement)!.value;
     }
 
     onPasswordChange(e:KeyboardEvent){
         this.form.password = (e.target as HTMLInputElement)!.value;
     }
 
-    @Effect((ctx:Button)=>[ctx.form.userName])
+    @Effect((ctx:Button)=>[ctx.form.username])
     onUsernameChange(oldValue:string){
-        console.log('username changes',{oldValue, newValue:this.form.userName});
+        console.log('username changes',{oldValue, newValue:this.form.username});
     }
 
     submit(){

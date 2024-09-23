@@ -5,10 +5,11 @@ import { TaskQueue } from "@beautiful-eyes/lib/src/taskQueue/taskQueue";
 const taskQueue = new TaskQueue();
 
 function runStateChangeSubscribers<This extends ReactiveClass>(this:This){
-    taskQueue.push({
-        cb: this.runSubscribers,
-        context:this,
-    });
+    // taskQueue.push({
+    //     cb: this.runSubscribers,
+    //     context:this,
+    // });
+    this.runSubscribers();
 }
 
 export function State(){

@@ -2,10 +2,11 @@
    <h2>Create Your Account</h2>
    <form id="userForm">
      <div class="input-group">
+        {form?.username}
        <label for="username">Username</label>
        <div>
        </div>
-       <input type="text" id="username" placeholder="Enter your username" @input={onUserNameChange}/>
+       <input type="text" value={form?.username} id="username" placeholder="Enter your username" @input={onUserNameChange}/>
      </div>
      <div class="input-group">
        <label for="password">Password</label>

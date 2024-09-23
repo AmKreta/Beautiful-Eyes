@@ -32,8 +32,10 @@ export class View{
 
     private addAttributes(el:HTMLElement, attributes:AttributeObj){
         for(let key in attributes){
-            const val = attributes[key];
-            el.setAttribute(key, typeof val === 'function'? val.call(this) : val);
+            let val = attributes[key];
+            if(typeof val === 'function') val = val.call(this.component);
+            if((el as any)[key]) (el as any)[key] = val;
+            else el.setAttribute(key, val as string);
         }
     }
 
@@ -41,9 +43,7 @@ export class View{
         for(let key in eventHandlers){
             const handler = eventHandlers[key] as Function;
             let fn = handler.call(this.component);
-            if(typeof fn === 'function'){
-                fn = fn.bind(this.component);
-            }
+            if(typeof fn === 'function') fn = fn.bind(this.component);
             el.addEventListener(key, fn);
         }
     }
@@ -59,7 +59,9 @@ export class View{
                 const textNode = document.createTextNode(text);
                 el.appendChild(textNode);
                 this.component.reactiveElements.set(textNode as any, ()=>{
-                    textNode.nodeValue = child.call(this.component);
+                    console.log(child, this.component)
+                    textNode.textContent = child.call(this.component);
+                    console.log('ran', textNode);
                 })
             }
             else{ 
