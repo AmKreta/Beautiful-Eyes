@@ -1,6 +1,6 @@
-type AttributeObj = Record<string, string | Function>
-type EventHandlerObject = Record<string, string | Function>;
-type RefObject = string;
+export type AttributeObj = Record<string, string | Function>
+export type EventHandlerObject = Record<string, string | Function>;
+export type RefObject = string;
 
 export type HtmlObj = {
     tagName:string, 

@@ -31,4 +31,16 @@ export class Types{
     static isDate(obj:any) : obj is Date{
         return Types.stringConv(obj) === '[object Date]';
     }
+
+    static isHtmlTag(tagName:string){
+        return /^[a-z]$/.test(tagName[0]);
+    }
+
+    static isComponent(tagName:string){
+        return /^[A-Z]$/.test(tagName[0]);
+    }
+
+    static isStructuralDirective(){
+
+    }
 };
