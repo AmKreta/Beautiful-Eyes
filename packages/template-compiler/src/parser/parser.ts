@@ -53,32 +53,28 @@ export class Parser {
             this.eat(TOKEN_TYPE.HASH);
         }
         const attributeName = this.currentToken.value;
-        this.eat(TOKEN_TYPE.STRING);
+        this.eat(TOKEN_TYPE.ATTRIBUTE_NAME);
         if (isRef) {
             return new HtmlAttribute(attributeName, '', false, ATTRIBUTE_TYPE.REF);
         }
         this.eat(TOKEN_TYPE.ASSIGNMENT);
         const tagType = isEventListener ? ATTRIBUTE_TYPE.EVENT_HANDLER : ATTRIBUTE_TYPE.VALUE;
-        if ([TOKEN_TYPE.SINGLE_QUOTE, TOKEN_TYPE.DOUBLE_QUOTE].includes(this.currentToken.tokenType)) {
-            this.eat(this.currentToken.tokenType); // it's either ' or ""
+        if (this.currentToken.isInterpolation) {
             const val = this.currentToken.value;
-            this.eat(TOKEN_TYPE.STRING);
-            this.eat(this.currentToken.tokenType);
-            return new HtmlAttribute(attributeName, val, false, tagType);
-        }
-        else if (this.currentToken.tokenType === TOKEN_TYPE.INTERPOLATION) {
-            // interpolation
-            const val = this.currentToken.value;
-            this.eat(TOKEN_TYPE.INTERPOLATION);
+            this.eat(TOKEN_TYPE.ATTRIBUTE_VALUE);
             return new HtmlAttribute(attributeName, val, true, tagType);
         }
-        throw new Error(`expected string or interpolation got ${this.currentToken}`)
+        else{
+            const val = this.currentToken.value;
+            this.eat(TOKEN_TYPE.ATTRIBUTE_VALUE);
+            return new HtmlAttribute(attributeName, val, false, tagType);
+        }
     }
 
     parseTag() {
         this.eat(TOKEN_TYPE.TAG_OPEN);
         const tagNAme = this.currentToken.value;
-        this.eat(TOKEN_TYPE.STRING);
+        this.eat(TOKEN_TYPE.TAG_NAME);
         const attributes: HtmlAttribute[] = [];
         const eventHandlers: HtmlAttribute[] = [];;
         let ref: HtmlAttribute | null = null;
@@ -107,7 +103,7 @@ export class Parser {
         }
         this.eat(TOKEN_TYPE.TAG_OPEN)
         this.eat(TOKEN_TYPE.TAG_CLOSE_SLASH);
-        this.eat(TOKEN_TYPE.STRING);
+        this.eat(TOKEN_TYPE.TAG_NAME);
         this.eat(TOKEN_TYPE.TAG_CLOSE);
         return new HtmlElement(tagNAme, attributes, children, eventHandlers, ref);
 
