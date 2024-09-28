@@ -58,11 +58,14 @@ export class Lexer{
                 this.advance();
                 return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.ASSIGNMENT);
             case '@':
+                if([TOKEN_TYPE.ATTRIBUTE_NAME, TOKEN_TYPE.ATTRIBUTE_VALUE].includes(this.prevToken.tokenType)){
+                    return this.prevToken = this.readAttributeName();
+                }
                 this.advance();
                 return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.AT_THE_RATE);
-            case '#':
-                this.advance();
-                return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.HASH);
+            // case '#':
+            //     this.advance();
+            //     return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.HASH);
             case '$':
                 this.advance();
                 return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.DOLLAR);
@@ -124,7 +127,13 @@ export class Lexer{
 
     private readAttributeName(){
         if(!this.currentChar) throw new Error(`please provide attribute or close the tag`);
-        if(!(/^[a-zA_Z]$/.test(this.currentChar))) throw new Error(`attriute name should start from an alphabet`);
+        if(['@','#'].includes(this.currentChar)){
+            if(!(/^[a-zA_Z]$/.test(this.source[this.currentPosition+1]))) 
+                throw new Error(`attriute name should start from an alphabet`);
+        }
+        else if(!(/^[a-zA_Z]$/.test(this.currentChar))){
+            throw new Error(`attriute name should start from an alphabet`);
+        }
         let str = this.currentChar;
         this.advance();
         while(this.currentPosition<this.source.length && ![' ','='].includes(this.currentChar)){

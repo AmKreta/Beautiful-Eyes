@@ -44,13 +44,15 @@ export class Parser {
 
     parseAttribute() {
         let isEventListener = false, isRef = false;
-        if (this.currentToken.tokenType === TOKEN_TYPE.AT_THE_RATE) {
+        if (this.currentToken.value.startsWith('@')) {
+            this.currentToken.value
             isEventListener = true;
-            this.eat(TOKEN_TYPE.AT_THE_RATE);
+            this.currentToken.value = this.currentToken.value.slice(1);
         }
-        else if (this.currentToken.tokenType === TOKEN_TYPE.HASH) {
+        else if (this.currentToken.tokenType.startsWith('#')) {
             isRef = true;
             this.eat(TOKEN_TYPE.HASH);
+            this.currentToken.value = this.currentToken.value.slice(1);
         }
         const attributeName = this.currentToken.value;
         this.eat(TOKEN_TYPE.ATTRIBUTE_NAME);
