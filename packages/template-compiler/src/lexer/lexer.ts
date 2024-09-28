@@ -58,7 +58,7 @@ export class Lexer{
                 this.advance();
                 return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.ASSIGNMENT);
             case '@':
-                if([TOKEN_TYPE.ATTRIBUTE_NAME, TOKEN_TYPE.ATTRIBUTE_VALUE].includes(this.prevToken.tokenType)){
+                if([TOKEN_TYPE.ATTRIBUTE_NAME, TOKEN_TYPE.ATTRIBUTE_VALUE, TOKEN_TYPE.TAG_NAME].includes(this.prevToken.tokenType)){
                     return this.prevToken = this.readAttributeName();
                 }
                 this.advance();
