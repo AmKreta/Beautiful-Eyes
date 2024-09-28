@@ -98,7 +98,7 @@ export class Lexer{
                     case TOKEN_TYPE.ATTRIBUTE_NAME: return this.prevToken = this.readAttributeName(); // <tag attr1 attr=attrval attr2/>
                     case TOKEN_TYPE.ASSIGNMENT: return this.prevToken = this.readAttributeValue(); 
                     case TOKEN_TYPE.AT_THE_RATE: return this.prevToken =  this.readStructuralDirectives();
-                    case TOKEN_TYPE.PARENTHESIS_OPEN: return this.prevToken =  TokenFactory.createFromTypeAndValue(TOKEN_TYPE.INTERPOLATION, this.readJSXInterpolation('(')); 
+                    case TOKEN_TYPE.PARENTHESIS_OPEN: return this.prevToken =  TokenFactory.createFromTypeAndValue(TOKEN_TYPE.INTERPOLATION, this.readJSXInterpolation('('), true);
                 }
                 if(isText(this.currentChar)){
                     return TokenFactory.createFromTypeAndValue(TOKEN_TYPE.STRING, this.readText());
@@ -149,7 +149,7 @@ export class Lexer{
 
     private readStructuralDirectives(){
         if(isText(this.currentChar)){
-            const text = this.readText();
+            const text = this.readStructuralDirectiveIdentifire();
             switch(text){
                 case TOKEN_VALUE[TOKEN_TYPE.FOR]: return TokenFactory.createFromType(TOKEN_TYPE.FOR);
                 case TOKEN_VALUE[TOKEN_TYPE.SWITCH]: return TokenFactory.createFromType(TOKEN_TYPE.SWITCH);
@@ -178,10 +178,19 @@ export class Lexer{
         return res;
     }
 
+    private readStructuralDirectiveIdentifire(){
+        const delimeters = new Set(['{','(']);
+        let res='';
+        while(this.currentPosition< this.source.length && !delimeters.has(this.currentChar)){
+            res+=this.source[this.currentPosition++];
+        }
+       return res;
+    }
+
     private readText(){
-        // reads innertexts mostly and similar string which has appended 
+        // reads innertexts mostly and similar string which is written with other tokens
         // interpolation, tags, structural directives etc
-        const delimeters = new Set(['{', "<",]);
+        const delimeters = new Set(['{', "<", "@"]);
         let res='';
         while(this.currentPosition< this.source.length && !delimeters.has(this.currentChar)){
             res+=this.source[this.currentPosition++];
