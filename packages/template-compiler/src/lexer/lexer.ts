@@ -74,31 +74,77 @@ export class Lexer{
                 return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.PARENTHESIS_CLOSE);    
             case '{':
                 if([TOKEN_TYPE.PARENTHESIS_CLOSE, TOKEN_TYPE.ELSE].includes(this.prevToken.tokenType)){
-                    // ie not a block node, eg if(condition){ <-
+                    // ie a block node, eg if(condition){ <- , else{ <-, else-if(condition){ <- 
                     this.advance();
                     return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.CURLEY_BRACKET_OPEN);
                 }
-                return this.prevToken = TokenFactory.createFromTypeAndValue(TOKEN_TYPE.INTERPOLATION, this.readJSXInterpolation());
+                else if(this.prevToken.tokenType===TOKEN_TYPE.ASSIGNMENT) return this.prevToken = this.readAttributeValue();
+                return this.prevToken = TokenFactory.createFromTypeAndValue(TOKEN_TYPE.INTERPOLATION, this.readJSXInterpolation(), true);
             case '}':
                 this.advance();
                 return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.CURLEY_BRACKET_CLOSE);
-            case "'":
-                this.advance();
-                return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.SINGLE_QUOTE);
-            case '"':
-                this.advance();
-                return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.DOUBLE_QUOTE);
+            // case "'":
+            //     this.advance();
+            //     return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.SINGLE_QUOTE);
+            // case '"':
+            //     this.advance();
+            //     return this.prevToken = TokenFactory.createFromType(TOKEN_TYPE.DOUBLE_QUOTE);
             default:
                 switch(this.prevToken.tokenType){
+                    case TOKEN_TYPE.TAG_CLOSE_SLASH:
+                    case TOKEN_TYPE.TAG_OPEN: return this.prevToken = this.readTagName();
+                    case TOKEN_TYPE.TAG_NAME: return this .prevToken = this.readAttributeName(); 
+                    case TOKEN_TYPE.ATTRIBUTE_VALUE:
+                    case TOKEN_TYPE.ATTRIBUTE_NAME: return this.prevToken = this.readAttributeName(); // <tag attr1 attr=attrval attr2/>
+                    case TOKEN_TYPE.ASSIGNMENT: return this.prevToken = this.readAttributeValue(); 
                     case TOKEN_TYPE.AT_THE_RATE: return this.prevToken =  this.readStructuralDirectives();
                     case TOKEN_TYPE.PARENTHESIS_OPEN: return this.prevToken =  TokenFactory.createFromTypeAndValue(TOKEN_TYPE.INTERPOLATION, this.readJSXInterpolation('(')); 
                 }
                 if(isText(this.currentChar)){
                     return TokenFactory.createFromTypeAndValue(TOKEN_TYPE.STRING, this.readText());
                 }
-            const currToken = this.currentChar
+            const currToken = this.currentChar;
             throw new Error(`unidentified token ${currToken}`);
         }
+    }
+
+    private readTagName(){
+        if(!this.currentChar) throw new Error(`tag name required <`);
+        if(!(/^[a-zA_Z]$/.test(this.currentChar))) throw new Error(`tag name should start from an alphabet`)
+        let str = this.currentChar;
+        this.advance();
+        while(this.currentPosition<this.source.length && ![' ', '>'].includes(this.currentChar)){
+            if(!(/^[a-zA_Z0-9_]*/.test(this.currentChar))) throw new Error(`tag name can only contain letters, digits and underscore`);
+            str+=this.currentChar;
+            this.advance();
+        }
+        if(this.currentPosition>=this.source.length)throw new Error(`you forgot to close tag <${str}`);
+        return TokenFactory.createFromTypeAndValue(TOKEN_TYPE.TAG_NAME, str);
+    }
+
+    private readAttributeName(){
+        if(!this.currentChar) throw new Error(`please provide attribute or close the tag`);
+        if(!(/^[a-zA_Z]$/.test(this.currentChar))) throw new Error(`attriute name should start from an alphabet`);
+        let str = this.currentChar;
+        this.advance();
+        while(this.currentPosition<this.source.length && ![' ','='].includes(this.currentChar)){
+            if(!(/^[a-zA_Z0-9_]*/.test(this.currentChar))) throw new Error(`attribute name can only contain letters, digits and underscore`);
+            str+=this.currentChar;
+            this.advance();
+        }
+        if(this.currentPosition>=this.source.length)throw new Error(`you forgot to close tag <${str}`);
+        return TokenFactory.createFromTypeAndValue(TOKEN_TYPE.ATTRIBUTE_NAME, str);
+    }
+
+    private readAttributeValue(){
+        if(!this.currentChar) throw new Error(`you forgot to provide attribute value`);
+        if(this.currentChar === TOKEN_VALUE[TOKEN_TYPE.CURLEY_BRACKET_OPEN]) 
+            return TokenFactory.createFromTypeAndValue(TOKEN_TYPE.ATTRIBUTE_VALUE, this.readJSXInterpolation(), true);
+        else if(['"',"'"].includes(this.currentChar)){
+            return TokenFactory.createFromTypeAndValue(TOKEN_TYPE.ATTRIBUTE_VALUE, this.readString());
+        }
+        else 
+            throw new Error("attribute value should be a string or an interpolation");
     }
 
     private readStructuralDirectives(){
@@ -119,11 +165,23 @@ export class Lexer{
         }
     }
 
-    private readText(){
-        const delimeters = new Set(['"', "'", '{', "<", ">", "=", '(', ')', '[', ']', ',', ':']);
-        if(this.prevToken.tokenType===TOKEN_TYPE.TAG_OPEN){
-            delimeters.add(' '); // <div id='a' , it will read only till div
+    private readString(){
+        // only use when you know it's pure string
+        // like attribute value
+        this.advance();
+        let res = '';
+        while(!['"',"'"].includes(this.currentChar)){
+            res+=this.currentChar;
+            this.advance();
         }
+        this.advance();
+        return res;
+    }
+
+    private readText(){
+        // reads innertexts mostly and similar string which has appended 
+        // interpolation, tags, structural directives etc
+        const delimeters = new Set(['{', "<",]);
         let res='';
         while(this.currentPosition< this.source.length && !delimeters.has(this.currentChar)){
             res+=this.source[this.currentPosition++];

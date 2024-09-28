@@ -6,7 +6,7 @@ export class TokenFactory{
         return new Token(token, TOKEN_VALUE[token]);
     }
 
-    static createFromTypeAndValue(token:TOKEN_TYPE, value:string){
-        return new Token(token, value);
+    static createFromTypeAndValue(token:TOKEN_TYPE, value:string, isInterpolation?:boolean){
+        return new Token(token, value, isInterpolation);
     }
 }
