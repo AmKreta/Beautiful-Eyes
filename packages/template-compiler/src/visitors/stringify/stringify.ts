@@ -12,7 +12,7 @@ import { Ref } from "../../nodes/ref/ref.component";
 export class Stringify extends Visitor{
 
     visitHtmlAttribute(htmlAttribute: HtmlAttribute ){
-        return `${htmlAttribute.attributeName}:${htmlAttribute.attributeValue.acceptVisitor(this)},`;
+        return `${htmlAttribute.attributeName}:${htmlAttribute.attributeValue.acceptVisitor(this)}`;
     }
 
     visitInterpolation(interpolation:Interpolation ){
