@@ -1,24 +1,7 @@
-import interpolationTranspiler from "../../interpolationTranspiler/interpolationTranspiler";
-import { Visitor } from "../../visitors/visitor/visitor";
-import { astNode } from "../astNode/astNode";
-import { HtmlElement } from "../HtmlElement/HtmlElement";
+import { Interpolation } from "../interpolation/interpolation";
+import { StringNode } from "../string/string";
+import {HtmlElement} from '../HtmlElement/HtmlElement';
+import { IfElse } from "../ifElse/ifElse";
 
-export class HtmlChild extends astNode{
-    constructor(
-        private content:string | HtmlElement,
-        private isInterpolation:boolean = false,
-        private isHtmlElement:boolean = false
-    ){
-        super();
-    }
-
-    acceptVisitor(visitor: Visitor) {
-       if(this.isInterpolation){
-        return `function(){return ${interpolationTranspiler(this.content as string)}}`
-       }
-       if(this.isHtmlElement){
-        return (this.content as HtmlElement).acceptVisitor(visitor) // visitor.visitHtmlElement(visitor);
-       }
-       return this.content as string;
-    }
-}
+export type HtmlChild = HtmlElement | Interpolation | StringNode | IfElse;
+export type htmlChildren = HtmlChild[];

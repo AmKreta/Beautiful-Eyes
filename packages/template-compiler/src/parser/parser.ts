@@ -4,6 +4,9 @@ import { ATTRIBUTE_TYPE, HtmlAttribute } from "../nodes/HtmlAttribute/HtmlAttrib
 import { HtmlChild } from "../nodes/HtmlChild/htmlChild";
 import { HtmlElement } from "../nodes/HtmlElement/HtmlElement";
 import { IfElse, IfElseConditions } from "../nodes/ifElse/ifElse";
+import { Interpolation } from "../nodes/interpolation/interpolation";
+import { Ref } from "../nodes/ref/ref.component";
+import { StringNode } from "../nodes/string/string";
 import { Token, TOKEN_TYPE, TOKEN_VALUE } from "../token";
 
 export class Parser {
@@ -23,25 +26,6 @@ export class Parser {
         }
     }
 
-    parseChildren() {
-        switch (this.currentToken.tokenType) {
-            case TOKEN_TYPE.STRING: {
-                const content = this.currentToken.value;
-                this.eat(TOKEN_TYPE.STRING);
-                return new HtmlChild(content);
-            }
-            case TOKEN_TYPE.INTERPOLATION: {
-                const content = this.currentToken.value;
-                this.eat(TOKEN_TYPE.INTERPOLATION);
-                return new HtmlChild(content, true);
-            }
-            case TOKEN_TYPE.TAG_OPEN:
-                return this.parseTag();
-            default:
-                throw new Error(`while parsing children, expected string, interpolation or htmlElements got ${this.currentToken.value}`);
-        }
-    }
-
     parseAttribute() {
         let isEventListener = false, isRef = false;
         if (this.currentToken.value.startsWith('@')) {
@@ -57,19 +41,19 @@ export class Parser {
         const attributeName = this.currentToken.value;
         this.eat(TOKEN_TYPE.ATTRIBUTE_NAME);
         if (isRef) {
-            return new HtmlAttribute(attributeName, '', false, ATTRIBUTE_TYPE.REF);
+            return new HtmlAttribute(attributeName, new Ref(attributeName), ATTRIBUTE_TYPE.REF);
         }
         this.eat(TOKEN_TYPE.ASSIGNMENT);
         const tagType = isEventListener ? ATTRIBUTE_TYPE.EVENT_HANDLER : ATTRIBUTE_TYPE.VALUE;
         if (this.currentToken.isInterpolation) {
-            const val = this.currentToken.value;
+            const content = this.currentToken.value;
             this.eat(TOKEN_TYPE.ATTRIBUTE_VALUE);
-            return new HtmlAttribute(attributeName, val, true, tagType);
+            return new HtmlAttribute(attributeName, new Interpolation(content), tagType);
         }
         else{
-            const val = this.currentToken.value;
+            const content = this.currentToken.value;
             this.eat(TOKEN_TYPE.ATTRIBUTE_VALUE);
-            return new HtmlAttribute(attributeName, val, false, tagType);
+            return new HtmlAttribute(attributeName, new StringNode(content), tagType);
         }
     }
 
@@ -99,16 +83,13 @@ export class Parser {
             }
         }
         this.eat(TOKEN_TYPE.TAG_CLOSE);
-        const children: (HtmlChild | HtmlElement)[] = [];
-        while (!((this.currentToken.tokenType as any) === TOKEN_TYPE.TAG_OPEN && this.lexer.peek() === '/')) {
-            children.push(this.parseChildren());
-        }
+        const children: HtmlChild[] = [];
+        children.push(...this.parse('/', 1) as any);
         this.eat(TOKEN_TYPE.TAG_OPEN)
         this.eat(TOKEN_TYPE.TAG_CLOSE_SLASH);
         this.eat(TOKEN_TYPE.TAG_NAME);
         this.eat(TOKEN_TYPE.TAG_CLOSE);
         return new HtmlElement(tagNAme, attributes, children, eventHandlers, ref);
-
     }
 
     parseIfElse() {
@@ -122,7 +103,7 @@ export class Parser {
         this.eat(TOKEN_TYPE.CURLEY_BRACKET_OPEN);
         let body = this.parse(TOKEN_TYPE.CURLEY_BRACKET_CLOSE);
         this.eat(TOKEN_TYPE.CURLEY_BRACKET_CLOSE);
-        conditions.push([interpolation, body]);
+        conditions.push([new Interpolation(interpolation), body]);
 
         if (this.currentToken.tokenType !== TOKEN_TYPE.AT_THE_RATE) {
             return new IfElse(conditions);
@@ -139,7 +120,7 @@ export class Parser {
             this.eat(TOKEN_TYPE.CURLEY_BRACKET_OPEN);
             const body = this.parse(TOKEN_TYPE.CURLEY_BRACKET_CLOSE);
             this.eat(TOKEN_TYPE.CURLEY_BRACKET_CLOSE);
-            conditions.push([interpolation, body]);
+            conditions.push([new Interpolation(interpolation), body]);
         }
 
         if (this.currentToken.tokenType !== TOKEN_TYPE.AT_THE_RATE || this.lexer.peek(4) !== 'else') {
@@ -152,7 +133,7 @@ export class Parser {
         this.eat(TOKEN_TYPE.CURLEY_BRACKET_OPEN);
         body = this.parse(TOKEN_TYPE.CURLEY_BRACKET_CLOSE);
         this.eat(TOKEN_TYPE.CURLEY_BRACKET_CLOSE);
-        conditions.push(['', body]);
+        conditions.push([null, body]);
         return new IfElse(conditions);
     }
 
@@ -185,15 +166,20 @@ export class Parser {
         }
     }
 
-    parse(delimeter = TOKEN_TYPE.END_OF_FILE): astNode[] {
+    parse(delimeter:TOKEN_TYPE | string = TOKEN_TYPE.END_OF_FILE, peek=-1): astNode[] {
         const nodes: astNode[] = [];
-        while (this.currentToken.tokenType !== delimeter) {
+        while (peek>-1 ? this.lexer.peek(peek)!==delimeter :  this.currentToken.tokenType !== delimeter) {
             switch (this.currentToken.tokenType) {
                 case TOKEN_TYPE.AT_THE_RATE:
                     nodes.push(this.parseStructuralDirective());
                     break;
                 case TOKEN_TYPE.STRING:
-                    this.currentToken.value && nodes.push(new HtmlElement('textNode', [], [new HtmlChild(this.currentToken.value)]));
+                    this.currentToken.value && nodes.push(new StringNode(this.currentToken.value));
+                    this.eat(TOKEN_TYPE.STRING);
+                    break;
+                case TOKEN_TYPE.INTERPOLATION:
+                    this.currentToken.value && nodes.push(new Interpolation(this.currentToken.value));
+                    this.eat(TOKEN_TYPE.INTERPOLATION);
                     break;
                 case TOKEN_TYPE.TAG_OPEN:
                     nodes.push(this.parseTag());

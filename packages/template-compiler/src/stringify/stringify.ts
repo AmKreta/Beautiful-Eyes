@@ -26,7 +26,7 @@ function util(nodes: HtmlObj[]) {
         }
         res += "], eventHandlers:{";
         for (let eventName in node.eventHandlers) {
-            let val = node.eventHandlers[eventName] as string;
+            let val = node.eventHandlers[eventName] as any;
             if (val.startsWith('function(')) res += `${eventName} : ${val}, `;
             else throw new Error('event handler should be interpolation');
         }

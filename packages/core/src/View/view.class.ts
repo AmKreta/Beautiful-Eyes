@@ -59,9 +59,7 @@ export class View{
                 const textNode = document.createTextNode(text);
                 el.appendChild(textNode);
                 this.component.reactiveElements.set(textNode as any, ()=>{
-                    console.log(child, this.component)
                     textNode.textContent = child.call(this.component);
-                    console.log('ran', textNode);
                 })
             }
             else{ 

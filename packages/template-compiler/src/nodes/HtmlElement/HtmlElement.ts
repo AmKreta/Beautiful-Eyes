@@ -1,28 +1,29 @@
-import { HtmlObj } from "@beautiful-eyes/lib/types/types"
+import { AttributeObj, EventHandlerObject, HtmlObj } from "@beautiful-eyes/lib/types/types"
 import { Visitor } from "../../visitors/visitor/visitor";
 import { astNode } from "../astNode/astNode";
 import { HtmlAttribute } from "../HtmlAttribute/HtmlAttribute";
-import { HtmlChild } from "../HtmlChild/htmlChild";
+import { Interpolation } from "../interpolation/interpolation";
+import { htmlChildren } from "../HtmlChild/htmlChild";
 
 export class HtmlElement extends astNode{
     constructor(
         private tagName:string,
         private attributes:HtmlAttribute[] = [],
-        private children:(HtmlChild | HtmlElement)[] = [],
+        private children:htmlChildren = [],
         private eventHandlers:HtmlAttribute[] = [],
         private ref:HtmlAttribute | null = null
     ){
         super();
     }
 
-    acceptVisitor(visitor: Visitor) :HtmlObj{
-        const attributes:Record<string, string>={};
+    acceptVisitor(visitor: Visitor){
+        const attributes:AttributeObj={};
         this.attributes.forEach(attr=>{
             const {attributeName, attributeValue} = attr.acceptVisitor(visitor);
             attributes[attributeName] = attributeValue;
         });
 
-        const eventHandlers:Record<string, string>={};
+        const eventHandlers:EventHandlerObject={};
         this.eventHandlers.forEach(attr=>{
             const {attributeName, attributeValue} = attr.acceptVisitor(visitor);
             eventHandlers[attributeName] = attributeValue as any;
@@ -34,10 +35,7 @@ export class HtmlElement extends astNode{
             ref = attributeName;
         }
 
-        const children:(HtmlObj | string)[]= [];
-        this.children.forEach(child=>{
-            children.push(child.acceptVisitor(visitor));
-        });
+        const children:any = this.children.map(child=>child.acceptVisitor(visitor));
 
         return {
             tagName: this.tagName,
