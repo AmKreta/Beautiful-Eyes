@@ -4,7 +4,7 @@ export default function stringify(nodes: HtmlObj[]) {
     return `[${util(nodes)}]`;
 }
 
-function util(nodes: HtmlObj[]) {
+function util(nodes: any[]) {
     let res = '';
     for (let node of nodes) {
         res += `{tagName:"${node.tagName}", attributes:{`;

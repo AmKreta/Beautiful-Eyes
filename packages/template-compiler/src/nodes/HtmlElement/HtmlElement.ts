@@ -1,9 +1,9 @@
-import { AttributeObj, EventHandlerObject, HtmlObj } from "@beautiful-eyes/lib/types/types"
+import { AttributeObj, EventHandlerObject } from "@beautiful-eyes/lib"
 import { Visitor } from "../../visitors/visitor/visitor";
 import { astNode } from "../astNode/astNode";
 import { HtmlAttribute } from "../HtmlAttribute/HtmlAttribute";
-import { Interpolation } from "../interpolation/interpolation";
 import { htmlChildren } from "../HtmlChild/htmlChild";
+import { NODE_OBJ_TYPE } from "../../types/types";
 
 export class HtmlElement extends astNode{
     constructor(
@@ -38,7 +38,8 @@ export class HtmlElement extends astNode{
         const children:any = this.children.map(child=>child.acceptVisitor(visitor));
 
         return {
-            tagName: this.tagName,
+            type: NODE_OBJ_TYPE.HTML_ELEMENT,
+            name: this.tagName,
             attributes,
             eventHandlers,
             ref,

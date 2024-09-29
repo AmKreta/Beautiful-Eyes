@@ -1,3 +1,4 @@
+import { NODE_OBJ_TYPE } from "../../types/types";
 import { Visitor } from "../../visitors/visitor/visitor";
 import { astNode } from "../astNode/astNode";
 import { Interpolation } from "../interpolation/interpolation";
@@ -21,6 +22,7 @@ export class IfElse extends astNode{
             nodes.push([condition, n] as any);
         })
         return {
+            type:NODE_OBJ_TYPE.HTML_ELEMENT,
             directiveName:'if',
             nodes
         };
