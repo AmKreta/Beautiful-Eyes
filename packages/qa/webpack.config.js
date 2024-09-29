@@ -38,8 +38,8 @@ module.exports = {
     module: {
         rules: [
             {
-                test:/\.template.html/,
-                use : ['babel-loader']
+                test:/\.template.be/,
+                use : ['@beautiful-eyes/template-compiler/dist/index.js']
             },
             {
                 test:/\.(ts|tsx)$/,

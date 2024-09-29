@@ -1,33 +1,32 @@
-export enum NODE_TYPE{
-    ELEMENT = 'element',
-    FRAGMENT = 'fragment',
-    COMPONENT = 'component',
-    TEXT_NODE = 'text_node'
+export type Interpolation = Function;
+export type AttributeValue = string | Interpolation;
+export type AttributeObj = Record<string, AttributeValue>
+export type EventHandlerObject = Record<string, Interpolation>;
+export type RefObject = string;
+export type IfElse = [Interpolation, HtmlObj[]];
+export type NodeChild = string| HtmlObj | Interpolation | IfElse;
+export type NodeChildren = NodeChild[];
+
+export enum NODE_OBJ_TYPE {
+    HTML_ELEMENT,
+    DIRECTIVE
 };
 
-export interface IComponent{
-
+export type HtmlObj = {
+    type: NODE_OBJ_TYPE.HTML_ELEMENT
+    name:string, 
+    attributes:AttributeObj,
+    eventHandlers:EventHandlerObject,
+    ref:RefObject,
+    children:NodeChildren
 };
 
-export interface IProps{
-
+export type DirectiveObj = {
+    type: NODE_OBJ_TYPE.DIRECTIVE,
+    name: string,
+    children:[Interpolation, NodeChildren][]
 }
 
-export interface IDependencies{
+export type Node = HtmlObj | DirectiveObj;
 
-}
-
-export interface IHtmlObj{
-    type: NODE_TYPE;
-    kind: string | '' | IComponent;
-    props: IProps;
-    children:IHtmlObj[] | string;
-}
-
-export interface INode{
-    type: NODE_TYPE;
-    kind: string | '' | IComponent;
-    props: IProps;
-    children: INode[];
-    parent: INode | null;
-};
+export type DependencyFn = (ctx:any) => any[];

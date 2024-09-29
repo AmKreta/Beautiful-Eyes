@@ -1,6 +1,8 @@
+import { IComponent } from "../component/component.decorator";
 
-export default function bootstrap(el:HTMLElement, rootNode:any){
-   rootNode.init().then(()=>{
-    el.appendChild(rootNode.nodeTree);
-   });
+export default function bootstrap(el:HTMLElement, rootNode:IComponent | any){
+   const roots = rootNode.view.root;
+   const frag = document.createDocumentFragment();
+   roots.forEach((el:HTMLElement)=>frag.appendChild(el));
+   el.appendChild(frag);
 }

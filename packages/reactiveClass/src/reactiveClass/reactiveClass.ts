@@ -1,4 +1,5 @@
-import { BatchedUpdates } from "@beautiful-eyes/lib/src/Proxy/taskQueue/taskQueue";
+import { DependencyFn } from "@beautiful-eyes/lib";
+import { BatchedUpdates } from "@beautiful-eyes/lib/src/taskQueue/taskQueue";
 
 export type Subscribers = Map<string, Set<string>> | null;
 
@@ -9,29 +10,26 @@ export type Subscribers = Map<string, Set<string>> | null;
 // when state change, determine what path of state was changes, and which computed were affected, store them in paths
 // run loop on paths, run effectSubscribers for each path
 
+type PrevValue = any;
+type EffectFnName = string;
 export class ReactiveClass implements BatchedUpdates{
 
-    static readonly effectSubscribers = new Map<string, Set<string>>;
+    static readonly effectSubscribers = new Map<DependencyFn, EffectFnName>;
     static readonly computedSubscribers = new Map<string, Set<string>>;
-    batchedEffects:Set<string> | null = null;
-
+    otherSubscriptions:Function[] = [];
     static instances = 0;
+
+    batchedEffects:Set<string> | null = null;
+    effectDepFnPreviousValue = new Map<DependencyFn, PrevValue>;
 
     constructor(){
         ReactiveClass.instances++;
     }
 
     // dependency: state | computed -> [effectNames]
-    addEffectSubscribers(dependencies:string[], context:ClassMethodDecoratorContext){
+    addEffectSubscribers(dependency:DependencyFn, context:ClassMethodDecoratorContext){
         if(ReactiveClass.instances>1) return;
-        dependencies.forEach(dependency=>{
-            let subscriber = ReactiveClass.effectSubscribers.get(dependency);
-            if(!subscriber){
-                subscriber = new Set();
-                ReactiveClass.effectSubscribers.set(dependency, subscriber);
-            }
-            subscriber.add(context.name as string);
-        });
+        ReactiveClass.effectSubscribers.set(dependency, context.name as string);
     }
 
     // dependency state | computed -> [effectNames]
@@ -47,41 +45,39 @@ export class ReactiveClass implements BatchedUpdates{
         });
     }
 
-
-    batchEffectSubscribers(paths:string[]){
-        if(!this.batchedEffects){
-            this.batchedEffects = new Set<string>();
-        }
-        // runs effects when state changes
-        for(let path of paths){
-            const subscribers = ReactiveClass.effectSubscribers.get(path);
-            subscribers?.forEach((effectFnName:string)=>{
-                this.batchedEffects!.add(effectFnName);
-            });
-        }
-    }
-
-    runComputedSubscribers(path:string){
-        // determines which effect dependent on which path should run if a state is changed
-        const paths:string[] = [path];
-        const subscribers = ReactiveClass.computedSubscribers.get(path);
-        subscribers && paths.push(...subscribers);
-        return paths;
-    }
-
-    runSubscribers(path:string){
-        // determine which computed were affected and which effects were dependent on them
-        const paths = this.runComputedSubscribers(path);
-        // batching effects based on determined path
-        this.batchEffectSubscribers(paths);
+    runSubscribers(){
+        ReactiveClass.effectSubscribers.forEach((effectFnName, dependency)=>{
+            const latestValue = dependency(this);
+            if(this.effectDepFnPreviousValue.has(dependency)){
+                const prevValue = this.effectDepFnPreviousValue.get(dependency);
+                for(let i=0;i<latestValue.length;i++){
+                    if(latestValue[i]!==prevValue[i]){
+                        (this as any)[effectFnName].call(this, prevValue[i]);
+                    }
+                }
+            }
+            else{
+                for(let i=0;i<latestValue.length;i++){
+                    (this as any)[effectFnName].call(this, undefined);
+                }
+            }
+            this.effectDepFnPreviousValue.set(dependency, latestValue);
+        });
+        this.otherSubscriptions.forEach(subscription=>{
+            subscription.call(this)
+        });
     }
 
     comitBatchedItems(){
-        // running subscribers
-        if(!this.batchedEffects) return;
-        this.batchedEffects.forEach(effectFnName=>{
-            (this as any)[effectFnName]?.call(this);
-        });
-        this.batchedEffects = null;
+        // // running subscribers
+        // if(!this.batchedEffects) return;
+        // this.batchedEffects.forEach(effectFnName=>{
+        //     (this as any)[effectFnName]?.call(this);
+        // });
+        // this.batchedEffects = null;
+    }
+
+    addOtherSubscription(fn:Function){
+        this.otherSubscriptions.push(fn);
     }
 };

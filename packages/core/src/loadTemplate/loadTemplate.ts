@@ -1,13 +1,5 @@
-import { IHtmlObj } from "@beautiful-eyes/lib";
+import { HtmlObj } from "@beautiful-eyes/lib/types/types"
 
-export default function loadTemplate(template:IHtmlObj | string) : Promise<IHtmlObj>{
-    return new Promise(async function(resolve){
-        const t:any = await Promise.resolve(template);
-        if(t.__esModule){
-            resolve(t.default);
-        }
-        else{
-            resolve(t);
-        }
-    });
+export default function loadTemplate(template:HtmlObj | string){
+    return (template as any).default;
 }

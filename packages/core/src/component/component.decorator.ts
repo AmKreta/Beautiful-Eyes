@@ -1,42 +1,52 @@
-import buildNodeTree from "../buildNodeTree/buildNodeTree";
-import loadTemplate from "../loadTemplate/loadTemplate";
-import {IHtmlObj} from '@beautiful-eyes/lib';
+import { HtmlObj } from "@beautiful-eyes/lib/types/types"
+import { View } from "../View/view.class";
 
 type ComponentOptions = {
-    useTemplate:string | IHtmlObj,
+    useTemplate:HtmlObj[],
     useStyleSheets:string[]
 }
 
 type Constructor<T = {}> = new(...arga:any[])=>T;
 
+export interface IComponent{
+    view:View;
+    template:HtmlObj[];
+    nodeTree:any;
+    reactiveElements:Map<HTMLElement, Function>;
+    init:()=>void;
+}
+
 export default function Component(options:ComponentOptions){
     return function<T extends Constructor>(target:T, context:ClassDecoratorContext):T{
-        class Component extends target{
-            static template:IHtmlObj | null = null;
+        class Component extends target implements IComponent{
+            static _template:HtmlObj[] = options.useTemplate;
             nodeTree:any;
+            reactiveElements:Map<HTMLElement, Function> = new Map();
+            view:View = new View(this);
             
             constructor(...props:any[]){
                 super(...props);
+                this.init();
             }
 
-            async init(){
-                Component.template = await loadTemplate(options.useTemplate);
-                if(!Component.template) throw new Error("template is required for " + context.name);
-                this.nodeTree = buildNodeTree(Component.template);
+            init(){
+                if(!this.template) throw new Error("template is required for " + context.name);
+                (this as any).addOtherSubscription?.(()=>{
+                    this.reactiveElements.forEach((fn:Function,element:HTMLElement) => {
+                        fn.call(this);
+                    });
+                });
             }
 
-            mounted(){
-                this.parentClass.mounted();
-            }
-
-            async destroyed(){
+            destroyed(){
 
             }
 
-            get parentClass(){
-                return (this as any).__proto__.__proto__;
+            get template(){
+                return Component._template;
             }
         }
+
         return Component;
     }
 }

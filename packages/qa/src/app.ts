@@ -1,40 +1,43 @@
-import {bootstrap, ReactiveClass, Component, Effect, State} from '@beautiful-eyes/core';
+import {bootstrap, ReactiveClass, Component, Effect, State, Computed} from '@beautiful-eyes/core';
+import template from './app.template.be';
+import './app.styles.scss'
 
 @Component({
-    useTemplate:'./app.template.html',
+    useTemplate:template,
     useStyleSheets:[]
 })
 class Button extends ReactiveClass{
-    @State() a = [1,2,3,4,5];
-    @State() b = {key:'val'}
+    @State() form = {username:'amresh', password:''};
+    amk='neha'
 
-    @Effect(['a.length'])
-    onAChange(){
-        console.log('length of a changed to ', this.a.length);
+    onUserNameChange(e:KeyboardEvent){
+        this.form.username = (e.target as HTMLInputElement)!.value;
     }
 
-    @Effect(['b.key'])
-    logModification(){
-        console.log('b.key is changed to ', this.b.key);
+    onPasswordChange(e:KeyboardEvent){
+        this.form.password = (e.target as HTMLInputElement)!.value;
+    }
+
+    @Effect((ctx:Button)=>[ctx.form.username])
+    onUsernameChange(oldValue:string){
+        console.log('username changes',{oldValue, newValue:this.form.username});
+    }
+
+    submit(){
+        alert('submitting');
     }
 }
 
+
 const root = document.getElementById('root')!;
 const btn = new Button();
-(window as any).b = btn;
 bootstrap(root, btn);
 
-// should trigger effect only once
-btn.a.push(...[1,2,3,4,5])
+// btn.a[0] = 1;
+// btn.a[1] = 2;
 
-// should trigger effect
-delete (btn as any).b.key;
-
-setTimeout(()=>{
-    btn.a.splice(5,5);
-    console.log(btn.a)
-},1000)
-
+// btn.a[0] = 100;
+// btn.a[1] = 200;
 
 
 
