@@ -14,7 +14,7 @@ export class HtmlElement extends astNode{
         super();
     }
 
-    acceptVisitor(visitor: Visitor, tab?:number){
-       visitor.visitHtmlElement(this, tab);
+    acceptVisitor(visitor: Visitor){
+       return visitor.visitHtmlElement(this);
     }
 }

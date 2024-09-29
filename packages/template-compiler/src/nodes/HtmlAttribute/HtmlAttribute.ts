@@ -20,7 +20,7 @@ export class HtmlAttribute extends astNode{
         super();
     }
 
-    acceptVisitor(visitor: Visitor, tab?:number) {
-        return visitor.visitHtmlAttribute(this, tab);
+    acceptVisitor(visitor: Visitor) {
+        return visitor.visitHtmlAttribute(this);
     }
 }

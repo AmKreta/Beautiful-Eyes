@@ -14,7 +14,7 @@ export class IfElse extends astNode{
         super();
     }
 
-    acceptVisitor(visitor:Visitor, tab?:number){
-      return visitor.visitIfElse(this, tab);
+    acceptVisitor(visitor:Visitor){
+      return visitor.visitIfElse(this);
     }
 }

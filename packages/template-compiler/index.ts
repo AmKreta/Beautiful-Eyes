@@ -16,10 +16,11 @@ export default function transform(source:string){
     const lexer = new Lexer(source);
     const parser = new Parser(lexer);
     const ast = parser.parse();
-    const codeGen = new CodeGenerator();
-    const res = codeGen.eval(ast);
+    // const codeGen = new CodeGenerator();
+    // const res = codeGen.eval(ast);
     const stringify = new Stringify();
-    const stringifiedRes = stringify.eval(res);
+    const stringifiedRes = stringify.eval(ast);
+    console.log(stringifiedRes);
     return "module.exports = "+stringifiedRes;
 }
 

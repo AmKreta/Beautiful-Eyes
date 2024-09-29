@@ -7,11 +7,11 @@ import { IfElse } from "../../nodes/ifElse/ifElse";
 import { Ref } from "../../nodes/ref/ref.component";
 
 export abstract class Visitor{
-    abstract visitHtmlElement(htmlElement:HtmlElement, tab?:number):any;
-    abstract visitHtmlAttribute(htmlAttribute:HtmlAttribute, tab?:number):any;
-    abstract visitInterpolation(interpolation:Interpolation, tab?:number):string;
-    abstract visitStringNode(stringNode:StringNode, tab?:number):any;
-    abstract visitIfElse(ifElse:IfElse, tab?:number):any;
-    abstract visitRef(ref:Ref, tab?:number):any;
-    abstract eval(nodes:astNode[], tab?:number):any;
+    abstract visitHtmlElement(htmlElement:HtmlElement):any;
+    abstract visitHtmlAttribute(htmlAttribute:HtmlAttribute):any;
+    abstract visitInterpolation(interpolation:Interpolation):string;
+    abstract visitStringNode(stringNode:StringNode):any;
+    abstract visitIfElse(ifElse:IfElse):any;
+    abstract visitRef(ref:Ref):any;
+    abstract eval(nodes:astNode[]):any;
 };

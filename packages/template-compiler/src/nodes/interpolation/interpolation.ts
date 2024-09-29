@@ -7,7 +7,7 @@ export class Interpolation extends astNode{
         super();
     }
 
-    acceptVisitor(visitor: Visitor, tab?:number) {
-       return visitor.visitInterpolation(this, tab);
+    acceptVisitor(visitor: Visitor) {
+       return visitor.visitInterpolation(this);
     }
 }
