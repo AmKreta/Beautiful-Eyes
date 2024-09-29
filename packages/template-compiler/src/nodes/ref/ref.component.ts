@@ -7,7 +7,7 @@ export  class Ref extends astNode{
         super();
     }
 
-    acceptVisitor(visitor: Visitor) {
-        return this.name;
+    acceptVisitor(visitor: Visitor, tab?:number) {
+        return visitor.visitRef(this, tab);
     }
 }

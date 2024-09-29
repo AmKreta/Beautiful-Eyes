@@ -7,7 +7,7 @@ export class StringNode extends astNode{
         super();
     }
 
-    acceptVisitor(visitor: Visitor) {
+    acceptVisitor(visitor: Visitor, tab?:number) {
         return `"${this.content}"`;
     }
 }

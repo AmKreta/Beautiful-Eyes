@@ -13,17 +13,14 @@ export enum ATTRIBUTE_TYPE{
 
 export class HtmlAttribute extends astNode{
     constructor(
-        private attributeName:string,
-        private attributeValue: StringNode | Interpolation | Ref,
+        public attributeName:string,
+        public attributeValue: StringNode | Interpolation | Ref,
         public attributeType:ATTRIBUTE_TYPE = ATTRIBUTE_TYPE.VALUE
     ){
         super();
     }
 
-    acceptVisitor(visitor: Visitor) {
-        return {
-            attributeName:this.attributeName,
-            attributeValue: this.attributeValue.acceptVisitor(visitor)
-        }
+    acceptVisitor(visitor: Visitor, tab?:number) {
+        return visitor.visitHtmlAttribute(this, tab);
     }
 }

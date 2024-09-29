@@ -1,6 +1,6 @@
 import {Lexer, TOKEN_TYPE} from './src';
 import { Parser } from './src/parser/parser';
-import stringify from './src/stringify/stringify';
+import {Stringify} from './src/visitors/stringify/stringify';
 import { CodeGenerator } from './src/visitors/codeGenerator/codeGenerator';
 
 export function printTokens(source:string){
@@ -18,8 +18,9 @@ export default function transform(source:string){
     const ast = parser.parse();
     const codeGen = new CodeGenerator();
     const res = codeGen.eval(ast);
-    // const stringifiedRes = stringify(res);
-    // return "module.exports = "+stringifiedRes;
+    const stringify = new Stringify();
+    const stringifiedRes = stringify.eval(res);
+    return "module.exports = "+stringifiedRes;
 }
 
 transform(`@if(condition){
