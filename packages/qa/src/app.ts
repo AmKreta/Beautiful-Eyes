@@ -7,18 +7,11 @@ import './app.styles.scss'
     useStyleSheets:[]
 })
 class Button extends ReactiveClass{
-    @State() a = 1;
+    @State() a = 10;
 
     constructor(){
         super();
-
-        setInterval(()=>{
-            this.a++;
-        }, 1000);
-    }
-
-    submit(){
-        alert('submitting');
+        setInterval(()=>this.a++, 2000);
     }
 }
 
@@ -26,12 +19,6 @@ class Button extends ReactiveClass{
 const root = document.getElementById('root')!;
 const btn = new Button();
 bootstrap(root, btn);
-
-// btn.a[0] = 1;
-// btn.a[1] = 2;
-
-// btn.a[0] = 100;
-// btn.a[1] = 200;
 
 
 
