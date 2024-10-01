@@ -101,10 +101,13 @@ export class View{
                 return i;
             }
         }
-        return ifElse.length-1;
+        return -1;
     }
 
     private mountIfElseBodyWithIndex(ifElse:IfElse, index:number){
+        if(index==-1){
+            return [];
+        }
         const nodeArray = ifElse[index][1];
         return nodeArray.map(node=>this.buildNodeTree(node)) as any;
     }
@@ -113,22 +116,14 @@ export class View{
         const lastIndex = ifElse.length-1;
         for(let i = 0; i<lastIndex; i++){
             const [interpolation, nodeArray] = ifElse[i];
-            if(interpolation && interpolation.call(this.component)){
+            if(!interpolation || interpolation.call(this.component)){
                 // if, else-if
                 return [i, nodeArray.map(node=>this.buildNodeTree(node)) as any];
             }
         }
         // else part
-        const [interpolation, nodeArray] = ifElse[lastIndex];
-        return [lastIndex, nodeArray.map(node=>this.buildNodeTree(node)) as any];
-    }
-
-    updateAttribute(){
-
-    }
-
-    updateChild(){
-
+        // const [interpolation, nodeArray] = ifElse[lastIndex];
+        return [-1, []];
     }
 
     unMountNode(el:HTMLElement | Text){
