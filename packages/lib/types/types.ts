@@ -3,9 +3,9 @@ export type AttributeValue = string | Interpolation;
 export type AttributeObj = Record<string, AttributeValue>
 export type EventHandlerObject = Record<string, Interpolation>;
 export type RefObject = string;
-export type IfElse = [Interpolation, HtmlObj[]];
-export type NodeChild = string| HtmlObj | Interpolation | IfElse;
-export type NodeChildren = NodeChild[];
+export type IfElse = [Interpolation, BE_Node[]];
+export type BE_Node = string | HtmlObj | Interpolation | DirectiveObj;
+export type BE_Nodes = BE_Node[];
 
 export enum NODE_OBJ_TYPE {
     HTML_ELEMENT,
@@ -18,15 +18,13 @@ export type HtmlObj = {
     attributes:AttributeObj,
     eventHandlers:EventHandlerObject,
     ref:RefObject,
-    children:NodeChildren
+    children:BE_Nodes
 };
 
 export type DirectiveObj = {
     type: NODE_OBJ_TYPE.DIRECTIVE,
     name: string,
-    children:[Interpolation, NodeChildren][]
+    children:[Interpolation, BE_Node][]
 }
-
-export type Node = HtmlObj | DirectiveObj;
 
 export type DependencyFn = (ctx:any) => any[];

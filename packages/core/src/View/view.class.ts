@@ -1,5 +1,4 @@
-import { AttributeObj, EventHandlerObject, HtmlObj } from "@beautiful-eyes/lib";
-import { Types } from "@beautiful-eyes/lib/src/types/types";
+import { AttributeObj, BE_Node, EventHandlerObject, HtmlObj, Interpolation, NODE_OBJ_TYPE } from "@beautiful-eyes/lib";
 import { IComponent } from "../component/component.decorator";
 
 export class View{
@@ -8,27 +7,55 @@ export class View{
     updatorFunctions:{context: IComponent, function:Function[]}[] = [];
 
     constructor(private component:IComponent){
-        this.root = this.template.map((htmltemplate:HtmlObj)=>this.buildNodeTree(htmltemplate));
+        this.root = this.template.map((htmltemplate:BE_Node)=>this.buildNodeTree(htmltemplate)) as any;
     }
 
     private get template(){
         return this.component.template;
     }
 
-    private buildNodeTree(htmlObj:HtmlObj){
-        const {tagName, attributes, children, eventHandlers} = htmlObj;
-        if(Types.isHtmlTag(tagName)){
-            let el = document.createElement(tagName);
-            this.addEventListeners(el, eventHandlers);
-            this.addAttributes(el, attributes);
-            this.addChildren(el, children);
-            return el;
-        }
-        else if(Types.isComponent(tagName)){
+    private buildNodeTree(obj:BE_Node, parent?:HTMLElement){
+        if(typeof obj === 'string') return this.buildStringNode(obj, parent);
+        else if(typeof obj === 'function') return this.buildInterpolationNode(obj, parent);
+        else if(obj.type === NODE_OBJ_TYPE.HTML_ELEMENT) return this.buildHtmlElement(obj, parent);
+        else if(obj.type === NODE_OBJ_TYPE.DIRECTIVE){
 
         }
-        throw new Error('component name is invalid '+ tagName);
+        else{
+            
+            // else if(Types.isComponent(tagName)){
+    
+            // }
+            //throw new Error('component name is invalid '+ tagName);
+        }
     }
+
+    private buildStringNode(content:string, parent?:HTMLElement){
+        const textNode = document.createTextNode(content);
+        parent?.appendChild(textNode);
+        return textNode;
+    }
+
+    private buildInterpolationNode(interpolation:Interpolation, parent?:HTMLElement){
+        const text = interpolation.call(this.component);
+        const textNode = document.createTextNode(text);
+        parent?.appendChild(textNode);
+        this.component.reactiveElements.set(textNode as any, ()=>{
+            textNode.textContent = interpolation.call(this.component);
+        });
+        return textNode;
+    }
+
+    private buildHtmlElement(HtmlObj:HtmlObj, parent?:HTMLElement){
+        const {name:tagName, attributes, children, eventHandlers} = HtmlObj;
+        let el = document.createElement(tagName);
+        this.addEventListeners(el, eventHandlers);
+        this.addAttributes(el, attributes);
+        HtmlObj.children.forEach(child=>this.buildNodeTree(child, el));
+        parent?.appendChild(el);
+        return el;
+    }
+
 
     private addAttributes(el:HTMLElement, attributes:AttributeObj){
         for(let key in attributes){
@@ -45,26 +72,6 @@ export class View{
             let fn = handler.call(this.component);
             if(typeof fn === 'function') fn = fn.bind(this.component);
             el.addEventListener(key, fn);
-        }
-    }
-
-    private addChildren(el:HTMLElement, children:HtmlObj['children']){
-        for(let child of children){
-            if(typeof child === 'string'){
-                const textNode = document.createTextNode(child);
-                el.appendChild(textNode);
-            }
-            else if(typeof child === 'function'){
-                const text = child.call(this.component);
-                const textNode = document.createTextNode(text);
-                el.appendChild(textNode);
-                this.component.reactiveElements.set(textNode as any, ()=>{
-                    textNode.textContent = child.call(this.component);
-                })
-            }
-            else{ 
-                el.appendChild(this.buildNodeTree(child))
-            }
         }
     }
 
