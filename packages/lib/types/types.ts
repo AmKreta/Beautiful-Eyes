@@ -3,7 +3,7 @@ export type AttributeValue = string | Interpolation;
 export type AttributeObj = Record<string, AttributeValue>
 export type EventHandlerObject = Record<string, Interpolation>;
 export type RefObject = string;
-export type IfElse = [Interpolation, BE_Node[]];
+export type IfElse = [Interpolation, BE_Node[]][];
 export type BE_Node = string | HtmlObj | Interpolation | DirectiveObj;
 export type BE_Nodes = BE_Node[];
 
@@ -24,7 +24,7 @@ export type HtmlObj = {
 export type DirectiveObj = {
     type: NODE_OBJ_TYPE.DIRECTIVE,
     name: string,
-    children:[Interpolation, BE_Node][]
+    children:IfElse
 }
 
 export type DependencyFn = (ctx:any) => any[];

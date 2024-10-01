@@ -14,6 +14,7 @@ export interface IComponent{
     nodeTree:any;
     reactiveElements:Map<HTMLElement, Function>;
     init:()=>void;
+    _HtmlParent:HTMLElement;
 }
 
 export default function Component(options:ComponentOptions){
@@ -22,7 +23,8 @@ export default function Component(options:ComponentOptions){
             static _template:HtmlObj[] = options.useTemplate;
             nodeTree:any;
             reactiveElements:Map<HTMLElement, Function> = new Map();
-            view:View = new View(this);
+            _HtmlParent: HTMLElement = document.body;
+            view:View = new View(this, this._HtmlParent);
             
             constructor(...props:any[]){
                 super(...props);
@@ -44,6 +46,10 @@ export default function Component(options:ComponentOptions){
 
             get template(){
                 return Component._template;
+            }
+
+            private setHtmlParent(el:HTMLElement){
+                this._HtmlParent = el;
             }
         }
 
