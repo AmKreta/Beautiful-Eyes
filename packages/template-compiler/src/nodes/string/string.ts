@@ -8,6 +8,6 @@ export class StringNode extends astNode{
     }
 
     acceptVisitor(visitor: Visitor) {
-        return `"${this.content}"`;
+        return visitor.visitStringNode(this);
     }
 }

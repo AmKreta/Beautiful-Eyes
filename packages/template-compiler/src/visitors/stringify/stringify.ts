@@ -24,7 +24,7 @@ export class Stringify extends Visitor{
     }
 
     visitStringNode(stringNode:StringNode){
-        return `${stringNode.content},`;
+        return `"${stringNode.content}",`;
     }
 
     visitHtmlElement(htmlElement:HtmlElement){
