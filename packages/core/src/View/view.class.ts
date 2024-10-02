@@ -1,4 +1,4 @@
-import { AttributeObj, BE_Node, DirectiveObj, EventHandlerObject, HtmlObj, IfElse, Interpolation, NODE_OBJ_TYPE } from "@beautiful-eyes/lib";
+import { AttributeObj, BE_Node, BE_Nodes, DirectiveObj, EventHandlerObject, HtmlObj, IfElse, Interpolation, NODE_OBJ_TYPE } from "@beautiful-eyes/lib";
 import { IComponent } from "../component/component.decorator";
 
 export class View{
@@ -77,15 +77,25 @@ export class View{
         const comment = document.createComment('if');
         let [lastIndex, nodeRoot] = this.mountIfElseBody(directive.children);
         this.appendChildrenToParent(nodeRoot, comment);
+        this.setCommentNodeProperty(comment, 'nodeChild', nodeRoot);
         this.component.reactiveElements.set(comment as any, ()=>{
             const currentInterpolationIndex = this.getIfElseTrueConditionIndex(directive.children);
             if(currentInterpolationIndex === lastIndex) return;
             nodeRoot.forEach(node=>this.unMountNode(node));
             nodeRoot = this.mountIfElseBodyWithIndex(directive.children, currentInterpolationIndex);
+            this.setCommentNodeProperty(comment, 'nodeChild', nodeRoot);
             lastIndex = currentInterpolationIndex;
             this.appendChildrenToParent(nodeRoot, comment);
         });
         return comment;
+    }
+
+    private setCommentNodeProperty(node:Comment, key:string, value:any){
+        (node as any)[key] = value;
+    }
+
+    private getCommentNodeProperty(node:Comment, key:string){
+        return (node as any)[key];
     }
 
     private getIfElseTrueConditionIndex(ifElse:IfElse){
@@ -121,16 +131,22 @@ export class View{
     }
 
     unMountNode(el:HTMLElement | Text | Comment){
+        if(el instanceof Comment){
+            const nodes = this.getCommentNodeProperty(el, 'nodeChild');
+            nodes.forEach((node:any)=>this.unMountNode(node));
+        }
         this.removeFromReactiveElements(el);
         el.remove();
     }
 
     removeFromReactiveElements(el:HTMLElement | Text | Comment){
-      el.childNodes.forEach(child=>{
-        // optimize this
-        this.removeFromReactiveElements(child as any);
-      });
-      this.component.reactiveElements.delete(el as any);
+        if(el.childNodes){
+            el.childNodes.forEach(child=>{
+                // optimize this
+                this.removeFromReactiveElements(child as any);
+            });
+        }
+        this.component.reactiveElements.delete(el as any);
     }
 
     appendChildrenToParent(children:(HTMLElement | Comment | Text)[], parent:HTMLElement | Comment | Text){
