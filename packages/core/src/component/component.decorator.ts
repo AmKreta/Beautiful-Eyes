@@ -1,8 +1,8 @@
-import { HtmlObj } from "@beautiful-eyes/lib/types/types"
+import { BE_Node, BE_Nodes, HtmlObj } from "@beautiful-eyes/lib/types/types"
 import { View } from "../View/view.class";
 
 type ComponentOptions = {
-    useTemplate:HtmlObj[],
+    useTemplate:BE_Nodes,
     useStyleSheets:string[]
 }
 
@@ -10,7 +10,7 @@ type Constructor<T = {}> = new(...arga:any[])=>T;
 
 export interface IComponent{
     view:View;
-    template:HtmlObj[];
+    template:BE_Nodes;
     nodeTree:any;
     reactiveElements:Map<HTMLElement, Function>;
     init:()=>void;
@@ -20,7 +20,7 @@ export interface IComponent{
 export default function Component(options:ComponentOptions){
     return function<T extends Constructor>(target:T, context:ClassDecoratorContext):T{
         class Component extends target implements IComponent{
-            static _template:HtmlObj[] = options.useTemplate;
+            static _template:BE_Nodes = options.useTemplate;
             nodeTree:any;
             reactiveElements:Map<HTMLElement, Function> = new Map();
             _HtmlParent: HTMLElement = document.body;

@@ -3,54 +3,49 @@ import { IComponent } from "../component/component.decorator";
 
 export class View{
 
-    root:HTMLElement[] = [];
+    root:(HTMLElement | Text | Comment)[] = [];
     updatorFunctions:{context: IComponent, function:Function[]}[] = [];
 
     constructor(private component:IComponent, private parentEl:HTMLElement){
-        this.root = this.template.map((htmltemplate:BE_Node)=>this.buildNodeTree(htmltemplate, parentEl)) as any;
+        this.root = this.buildNodeTree();
     }
 
     private get template(){
         return this.component.template;
     }
 
-    private buildNodeTree(obj:BE_Node, parent?:HTMLElement){
-        if(typeof obj === 'string') return this.buildStringNode(obj, parent);
-        else if(typeof obj === 'function') return this.buildInterpolationNode(obj, parent);
-        else if(obj.type === NODE_OBJ_TYPE.HTML_ELEMENT) return this.buildHtmlElement(obj, parent);
-        else if(obj.type === NODE_OBJ_TYPE.DIRECTIVE) return this.buildDirectives(obj, parent);
-        else{
-            
-            // else if(Types.isComponent(tagName)){
-    
-            // }
-            //throw new Error('component name is invalid '+ tagName);
+    private buildNodeTree(template = this.template){
+        let htmlNodes:(HTMLElement | Text | Comment)[] = [];
+        for(let obj of template){
+            if(typeof obj === 'string') htmlNodes.push(this.buildStringNode(obj));
+            else if(typeof obj === 'function') htmlNodes.push(this.buildInterpolationNode(obj));
+            else if(obj.type === NODE_OBJ_TYPE.HTML_ELEMENT) htmlNodes.push(this.buildHtmlElement(obj));
+            else if(obj.type === NODE_OBJ_TYPE.DIRECTIVE) htmlNodes.push(this.buildDirectives(obj));
         }
+        return htmlNodes;
     }
 
-    private buildStringNode(content:string, parent?:HTMLElement){
+    private buildStringNode(content:string){
         const textNode = document.createTextNode(content);
-        parent?.appendChild(textNode);
         return textNode;
     }
 
-    private buildInterpolationNode(interpolation:Interpolation, parent?:HTMLElement){
+    private buildInterpolationNode(interpolation:Interpolation){
         const text = interpolation.call(this.component);
         const textNode = document.createTextNode(text);
-        parent?.appendChild(textNode);
         this.component.reactiveElements.set(textNode as any, ()=>{
             textNode.textContent = interpolation.call(this.component);
         });
         return textNode;
     }
 
-    private buildHtmlElement(HtmlObj:HtmlObj, parent?:HTMLElement){
+    private buildHtmlElement(HtmlObj:HtmlObj){
         const {name:tagName, attributes, children, eventHandlers} = HtmlObj;
         let el = document.createElement(tagName);
         this.addEventListeners(el, eventHandlers);
         this.addAttributes(el, attributes);
-        HtmlObj.children.forEach(child=>this.buildNodeTree(child, el));
-        parent?.appendChild(el);
+        const childNodes = this.buildNodeTree(HtmlObj.children);
+        this.appendChildrenToParent(childNodes, el);
         return el;
     }
 
@@ -73,23 +68,22 @@ export class View{
         }
     }
 
-    private buildDirectives(directive:DirectiveObj, parent?:HTMLElement){
-        if(directive.name === "ifElse") return this.addIfElseDirective(directive, parent);
+    private buildDirectives(directive:DirectiveObj){
+        if(directive.name === "ifElse") return this.addIfElseDirective(directive);
+        throw new Error('directive decleration not found');
     }
 
-    private addIfElseDirective(directive:DirectiveObj, parent?:HTMLElement){
+    private addIfElseDirective(directive:DirectiveObj){
         const comment = document.createComment('if');
-        parent?.appendChild(comment);
         let [lastIndex, nodeRoot] = this.mountIfElseBody(directive.children);
-        (nodeRoot as any).forEach((element:HTMLElement) => parent?.appendChild(element));
+        this.appendChildrenToParent(nodeRoot, comment);
         this.component.reactiveElements.set(comment as any, ()=>{
             const currentInterpolationIndex = this.getIfElseTrueConditionIndex(directive.children);
             if(currentInterpolationIndex === lastIndex) return;
             nodeRoot.forEach(node=>this.unMountNode(node));
-            const elements = this.mountIfElseBodyWithIndex(directive.children, currentInterpolationIndex);
+            nodeRoot = this.mountIfElseBodyWithIndex(directive.children, currentInterpolationIndex);
             lastIndex = currentInterpolationIndex;
-            nodeRoot = elements;
-            (nodeRoot as any).forEach((element:HTMLElement) => parent?.appendChild(element));
+            this.appendChildrenToParent(nodeRoot, comment);
         });
         return comment;
     }
@@ -109,16 +103,16 @@ export class View{
             return [];
         }
         const nodeArray = ifElse[index][1];
-        return nodeArray.map(node=>this.buildNodeTree(node)) as any;
+        return this.buildNodeTree(nodeArray);
     }
 
-    private mountIfElseBody(ifElse:IfElse):[number, HTMLElement[]]{
+    private mountIfElseBody(ifElse:IfElse):[number, (HTMLElement | Text | Comment)[]]{
         const lastIndex = ifElse.length-1;
         for(let i = 0; i<lastIndex; i++){
             const [interpolation, nodeArray] = ifElse[i];
             if(!interpolation || interpolation.call(this.component)){
                 // if, else-if
-                return [i, nodeArray.map(node=>this.buildNodeTree(node)) as any];
+                return [i, this.buildNodeTree(nodeArray)];
             }
         }
         // else part
@@ -126,16 +120,23 @@ export class View{
         return [-1, []];
     }
 
-    unMountNode(el:HTMLElement | Text){
+    unMountNode(el:HTMLElement | Text | Comment){
         this.removeFromReactiveElements(el);
         el.remove();
     }
 
-    removeFromReactiveElements(el:HTMLElement | Text){
+    removeFromReactiveElements(el:HTMLElement | Text | Comment){
       el.childNodes.forEach(child=>{
         // optimize this
         this.removeFromReactiveElements(child as any);
       });
       this.component.reactiveElements.delete(el as any);
+    }
+
+    appendChildrenToParent(children:(HTMLElement | Comment | Text)[], parent:HTMLElement | Comment | Text){
+        if(!parent) return children;
+        if(parent instanceof Comment) children.forEach(child=>parent.after(child));
+        else children.forEach(child=>parent.appendChild(child));
+        return parent;
     }
 }

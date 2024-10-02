@@ -24,10 +24,8 @@ export default function transform(source:string){
     return "module.exports = "+stringifiedRes;
 }
 
-transform(`@if(condition){
-    <div>{hello}</div>
-}@else-if(condition){
-    <div @click={eventHandler} attributeName={Interpolation} attributeName1 = 'value'>{hello}</div>
-}@else{
-    <div>{hello}</div>
+transform(`@if(a%2===0){
+ @if(a%4===0){
+  <h1>a {a + ' '} is even and divisible by 4 </h1>
+ }
 }`)
