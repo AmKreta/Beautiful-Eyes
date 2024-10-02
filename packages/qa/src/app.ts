@@ -11,7 +11,7 @@ class Button extends ReactiveClass{
 
     constructor(){
         super();
-        setInterval(()=>this.a++, 2000);
+       window.addEventListener('click',()=>this.a++);
     }
 }
 

@@ -17,6 +17,7 @@ export class View{
     private buildNodeTree(template = this.template){
         let htmlNodes:(HTMLElement | Text | Comment)[] = [];
         for(let obj of template){
+            if(!obj) continue;
             if(typeof obj === 'string') htmlNodes.push(this.buildStringNode(obj));
             else if(typeof obj === 'function') htmlNodes.push(this.buildInterpolationNode(obj));
             else if(obj.type === NODE_OBJ_TYPE.HTML_ELEMENT) htmlNodes.push(this.buildHtmlElement(obj));
@@ -76,8 +77,10 @@ export class View{
     private addIfElseDirective(directive:DirectiveObj){
         const comment = document.createComment('if');
         let [lastIndex, nodeRoot] = this.mountIfElseBody(directive.children);
-        this.appendChildrenToParent(nodeRoot, comment);
         this.setCommentNodeProperty(comment, 'nodeChild', nodeRoot);
+        // queue microtask runs before next render and macrotask and io
+        // dom is updated till now, but not rendered, so appensing all if-else blocks before rendering
+        queueMicrotask(()=>this.appendChildrenToParent(nodeRoot, comment));
         this.component.reactiveElements.set(comment as any, ()=>{
             const currentInterpolationIndex = this.getIfElseTrueConditionIndex(directive.children);
             if(currentInterpolationIndex === lastIndex) return;
@@ -85,7 +88,7 @@ export class View{
             nodeRoot = this.mountIfElseBodyWithIndex(directive.children, currentInterpolationIndex);
             this.setCommentNodeProperty(comment, 'nodeChild', nodeRoot);
             lastIndex = currentInterpolationIndex;
-            this.appendChildrenToParent(nodeRoot, comment);
+            queueMicrotask(()=>this.appendChildrenToParent(nodeRoot, comment));
         });
         return comment;
     }
@@ -109,24 +112,18 @@ export class View{
     }
 
     private mountIfElseBodyWithIndex(ifElse:IfElse, index:number){
-        if(index==-1){
-            return [];
-        }
+        if(index==-1) return [];
         const nodeArray = ifElse[index][1];
         return this.buildNodeTree(nodeArray);
     }
 
     private mountIfElseBody(ifElse:IfElse):[number, (HTMLElement | Text | Comment)[]]{
-        const lastIndex = ifElse.length-1;
-        for(let i = 0; i<lastIndex; i++){
+        for(let i = 0; i<ifElse.length; i++){
             const [interpolation, nodeArray] = ifElse[i];
             if(!interpolation || interpolation.call(this.component)){
-                // if, else-if
                 return [i, this.buildNodeTree(nodeArray)];
             }
         }
-        // else part
-        // const [interpolation, nodeArray] = ifElse[lastIndex];
         return [-1, []];
     }
 
@@ -151,8 +148,19 @@ export class View{
 
     appendChildrenToParent(children:(HTMLElement | Comment | Text)[], parent:HTMLElement | Comment | Text){
         if(!parent) return children;
-        if(parent instanceof Comment) children.forEach(child=>parent.after(child));
-        else children.forEach(child=>parent.appendChild(child));
+        if(parent instanceof Comment){
+            // add chidren only when mounted
+            parent.parentNode && children.forEach(child=>{
+                parent.after(child)
+                if(child instanceof Comment){
+                    const nodes = this.getCommentNodeProperty(child, 'nodeChild');
+                    this.appendChildrenToParent(nodes, child);
+                }
+            });
+        }
+        else children.forEach(child=>{
+            parent.appendChild(child)
+        });
         return parent;
     }
 }
