@@ -22,7 +22,7 @@ export class Lexer{
     }
 
     private skipNextLine(){
-        while(this.currentPosition<this.source.length && (this.currentChar==='\n' || this.currentChar==='\t')){
+        while(this.currentPosition<this.source.length && (['\n', '\t', '\r', '\r\n'].includes(this.currentChar))){
             this.advance();
         }
     }
@@ -107,7 +107,8 @@ export class Lexer{
                     return TokenFactory.createFromTypeAndValue(TOKEN_TYPE.STRING, this.readText());
                 }
             const currToken = this.currentChar;
-            throw new Error(`unidentified token ${currToken}`);
+            console.log({source:this.currentChar, pos:this.currentPosition})
+            throw new Error(`unidentified token "${currToken}"`);
         }
     }
 
