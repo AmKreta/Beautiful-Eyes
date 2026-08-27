@@ -1,6 +1,6 @@
 {
   "name": "@beautiful-eyes/lib",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Shared utilities for Beautiful Eyes -- Proxify, types, and helpers.",
   "main": "dist/index.js",
   "types": "index.ts",

@@ -1,6 +1,6 @@
 {
   "name": "@beautiful-eyes/core",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Beautiful Eyes runtime -- @Component, View, bootstrap, and reactive decorators.",
   "main": "dist/index.js",
   "types": "index.ts",
