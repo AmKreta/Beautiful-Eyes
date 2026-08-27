@@ -1,6 +1,6 @@
 {
   "name": "@beautiful-eyes/create",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Scaffold a Beautiful Eyes app: npx @beautiful-eyes/create my-app",
   "bin": {
     "create-beautiful-eyes": "./bin/create.js"

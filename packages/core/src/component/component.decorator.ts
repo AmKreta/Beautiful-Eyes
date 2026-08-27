@@ -1,4 +1,4 @@
-import { BE_Node, BE_Nodes, HtmlObj } from "@beautiful-eyes/lib/types/types"
+import { BE_Node, BE_Nodes, HtmlObj } from "@beautiful-eyes/lib"
 import { View } from "../View/view.class";
 import { ComponentRegistry } from "./componentRegistry";
 
